@@ -1,12 +1,11 @@
 import {
   advanceHead,
-  getBlobContent,
   getCommit,
   getHeadCommitHash,
   getHeadTree,
   type Repository,
 } from '@/domain/entities/Repository';
-import { EMPTY_TREE, type Tree } from '@/domain/entities/Tree';
+import { EMPTY_TREE } from '@/domain/entities/Tree';
 import { requireRepository, type Workspace } from '@/domain/entities/Workspace';
 import { PathspecNotKnownError, ResetWithPathsError } from '@/domain/errors/WorkingTreeErrors';
 import { parsePathspec } from '@/domain/services/pathspec';
@@ -16,6 +15,7 @@ import { shortHash, type Hash } from '@/domain/value-objects/Hash';
 
 import { explain, succeed, type CommandOutcome, type GitCommand } from './GitCommand';
 import { describeCommit } from './support/describeCommit';
+import { resetWorkingTree } from './support/resetWorkingTree';
 
 export type ResetMode = 'soft' | 'mixed' | 'hard';
 
@@ -83,7 +83,7 @@ export class ResetCommand implements GitCommand<ResetInput> {
       );
     }
 
-    const files = this.overwriteTrackedFiles(repository, workspace, targetTree);
+    const files = resetWorkingTree(repository, workspace.files, targetTree);
     return succeed(
       { ...workspace, files, repository: next },
       targetHash === null
@@ -91,26 +91,6 @@ export class ResetCommand implements GitCommand<ResetInput> {
         : `HEAD is now at ${describeCommit(getCommit(repository, targetHash))}`,
       explain('reset.hard', params),
     );
-  }
-
-  /** `--hard`: every tracked file takes the target's version; untracked files are left alone. */
-  private overwriteTrackedFiles(repository: Repository, workspace: Workspace, target: Tree) {
-    const files = new Map(Object.entries(workspace.files));
-    const tracked = new Set([
-      ...Object.keys(repository.index),
-      ...Object.keys(getHeadTree(repository)),
-      ...Object.keys(repository.unmerged),
-      ...Object.keys(target),
-    ]);
-    for (const path of tracked) {
-      const blob = target[path];
-      if (blob === undefined) {
-        files.delete(path);
-      } else {
-        files.set(path, getBlobContent(repository, blob));
-      }
-    }
-    return Object.fromEntries(files);
   }
 
   /** `git reset [<commit>] -- <paths>`: copy the commit's version of the paths into the index (unstage). */

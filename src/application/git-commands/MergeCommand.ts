@@ -4,7 +4,6 @@ import {
   currentBranch,
   findBranch,
   findTag,
-  getBlobContent,
   getCommit,
   getHeadCommitHash,
   getHeadTree,
@@ -38,6 +37,7 @@ import {
 import { formatDiffStat } from './support/diffStat';
 import { applyMergeResult, mergeTrees } from './support/mergeTrees';
 import { createCommitObject } from './support/objects';
+import { resetWorkingTree } from './support/resetWorkingTree';
 
 export type MergeInput =
   | {
@@ -210,24 +210,11 @@ export class MergeCommand implements GitCommand<MergeInput> {
       throw new NoOperationInProgressError('merge', 'abort');
     }
     const origTree = getCommit(repository, operation.origHead).tree;
-    const files = new Map(Object.entries(workspace.files));
-    const touched = new Set([
-      ...Object.keys(repository.index),
-      ...Object.keys(repository.unmerged),
-      ...Object.keys(origTree),
-    ]);
-    for (const path of touched) {
-      const blob = origTree[path];
-      if (blob === undefined) {
-        files.delete(path);
-      } else {
-        files.set(path, getBlobContent(repository, blob));
-      }
-    }
+    const files = resetWorkingTree(repository, workspace.files, origTree);
     return succeed(
       {
         ...workspace,
-        files: Object.fromEntries(files),
+        files,
         repository: { ...repository, index: origTree, unmerged: {}, operation: null },
       },
       '',
