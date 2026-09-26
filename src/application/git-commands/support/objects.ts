@@ -70,15 +70,20 @@ export interface CommitDraft {
   readonly message: CommitMessage;
   readonly author: Identity;
   readonly timestamp: Timestamp;
+  /** Who applied the change, when different from the author (cherry-pick, rebase). */
+  readonly committer?: { readonly identity: Identity; readonly timestamp: Timestamp };
 }
 
+const formatSignature = (identity: Identity, timestamp: Timestamp) =>
+  `${formatIdentity(identity)} ${timestamp.epochSeconds} ${formatTimezoneOffset(timestamp.timezoneOffsetMinutes)}`;
+
 export function createCommitObject(hasher: ObjectHasher, draft: CommitDraft): Commit {
-  const signature = `${formatIdentity(draft.author)} ${draft.timestamp.epochSeconds} ${formatTimezoneOffset(draft.timestamp.timezoneOffsetMinutes)}`;
+  const committer = draft.committer ?? { identity: draft.author, timestamp: draft.timestamp };
   const body = [
     `tree ${hashTree(hasher, draft.tree)}`,
     ...draft.parents.map((parent) => `parent ${parent}`),
-    `author ${signature}`,
-    `committer ${signature}`,
+    `author ${formatSignature(draft.author, draft.timestamp)}`,
+    `committer ${formatSignature(committer.identity, committer.timestamp)}`,
     '',
     `${draft.message}\n`,
   ].join('\n');
@@ -90,7 +95,7 @@ export function createCommitObject(hasher: ObjectHasher, draft: CommitDraft): Co
     message: draft.message,
     author: draft.author,
     authoredAt: draft.timestamp,
-    committer: draft.author,
-    committedAt: draft.timestamp,
+    committer: committer.identity,
+    committedAt: committer.timestamp,
   };
 }
