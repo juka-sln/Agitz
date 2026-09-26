@@ -10,6 +10,7 @@ import {
 } from '@/domain/entities/Repository';
 import { requireRepository, type Workspace } from '@/domain/entities/Workspace';
 import { BranchAlreadyExistsError, InvalidStartPointError } from '@/domain/errors/BranchErrors';
+import { UnresolvedIndexError } from '@/domain/errors/OperationErrors';
 import { InvalidReferenceError } from '@/domain/errors/RepositoryErrors';
 import { PathspecNotKnownError } from '@/domain/errors/WorkingTreeErrors';
 import { checkoutTree } from '@/domain/services/checkoutTree';
@@ -117,6 +118,7 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
     target: string,
     detach: boolean,
   ): CommandOutcome {
+    this.ensureResolvedIndex(repository);
     const isHead = target === 'HEAD' || target === '@';
     if (isHead && !detach) {
       return this.showLocalChanges(workspace, repository);
@@ -148,6 +150,7 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
     startPoint: string | undefined,
   ): CommandOutcome {
     const name = parseBranchName(rawName);
+    this.ensureResolvedIndex(repository);
     if (findBranch(repository, name) !== undefined) {
       throw new BranchAlreadyExistsError(name);
     }
@@ -173,6 +176,13 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
       target: name,
       kind: 'newBranch',
     });
+  }
+
+  private ensureResolvedIndex(repository: Repository): void {
+    const conflicted = Object.keys(repository.unmerged).sort(compareByteOrder);
+    if (conflicted.length > 0) {
+      throw new UnresolvedIndexError(conflicted);
+    }
   }
 
   /**
