@@ -37,9 +37,9 @@ export interface CheckoutInput {
   /** Arguments before `--`: a branch or commit to switch to, optionally followed by paths. */
   readonly targets: readonly string[];
   /** Arguments after `--`, always interpreted as paths. */
-  readonly paths?: readonly string[];
+  readonly paths?: readonly string[] | undefined;
   /** `-b <name>`: create a branch at the target (HEAD by default) and switch to it. */
-  readonly newBranch?: string;
+  readonly newBranch?: string | undefined;
   /** `--detach`: detach HEAD even when the target is a branch. */
   readonly detach?: boolean;
 }

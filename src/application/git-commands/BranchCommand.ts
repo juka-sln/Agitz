@@ -34,13 +34,13 @@ export type BranchInput =
   | {
       readonly action: 'create';
       readonly name: string;
-      readonly startPoint?: string;
+      readonly startPoint?: string | undefined;
       readonly force?: boolean;
     }
   | { readonly action: 'delete'; readonly names: readonly string[]; readonly force?: boolean }
   | {
       readonly action: 'rename';
-      readonly oldName?: string;
+      readonly oldName?: string | undefined;
       readonly newName: string;
       readonly force?: boolean;
     };

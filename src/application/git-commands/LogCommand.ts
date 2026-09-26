@@ -15,7 +15,7 @@ export interface LogInput {
   readonly revisions?: readonly string[];
   readonly all?: boolean;
   readonly oneline?: boolean;
-  readonly maxCount?: number;
+  readonly maxCount?: number | undefined;
 }
 
 /** Ref names shown next to each commit, e.g. `HEAD -> main, feature`. */

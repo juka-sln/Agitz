@@ -6,7 +6,7 @@ import { isValidBranchName } from '@/domain/value-objects/BranchName';
 import { explain, succeed, type CommandOutcome, type GitCommand } from './GitCommand';
 
 export interface InitInput {
-  readonly initialBranch?: string;
+  readonly initialBranch?: string | undefined;
 }
 
 export class InitCommand implements GitCommand<InitInput> {
