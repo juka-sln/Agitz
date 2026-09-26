@@ -1,6 +1,6 @@
 import { buildFileTree } from './buildFileTree';
 
-const entry = (path: string) => ({ path, staged: null, unstaged: null });
+const entry = (path: string) => ({ path, staged: null, unstaged: null, conflict: null });
 
 describe('buildFileTree', () => {
   it('emits each directory once with increasing depth', () => {

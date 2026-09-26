@@ -17,6 +17,7 @@ const fr = {
   'files.status.stagedDeleted': 'Suppression ajoutée à l’index',
   'files.status.modified': 'Modifié depuis le dernier git add',
   'files.status.deleted': 'Supprimé du disque, pas encore dans l’index',
+  'files.status.conflict': 'Conflit : corrige les marqueurs <<<<<<< puis fais git add',
 
   'graph.label': 'Graphe des commits',
   'graph.noRepository.title': 'Aucun dépôt Git ici',
@@ -61,6 +62,7 @@ const en: Record<MessageKey, string> = {
   'files.status.stagedDeleted': 'Deletion added to the index',
   'files.status.modified': 'Modified since the last git add',
   'files.status.deleted': 'Deleted from disk, not in the index yet',
+  'files.status.conflict': 'Conflict: fix the <<<<<<< markers, then run git add',
 
   'graph.label': 'Commit graph',
   'graph.noRepository.title': 'No Git repository here',

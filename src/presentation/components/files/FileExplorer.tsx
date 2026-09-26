@@ -9,6 +9,7 @@ const BADGE_CLASSES: Record<BadgeTone, string> = {
   modified: 'text-status-modified',
   untracked: 'text-status-untracked',
   deleted: 'text-status-deleted',
+  conflict: 'rounded bg-status-deleted px-1 text-canvas',
 };
 
 function FolderIcon() {
