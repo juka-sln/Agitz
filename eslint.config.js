@@ -47,12 +47,13 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
       'import-x/no-default-export': 'error',
       'import-x/no-cycle': 'error',
       'import-x/order': [
         'error',
         {
-          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          groups: ['builtin', 'external', 'internal', 'parent', ['sibling', 'index']],
           pathGroups: [{ pattern: '@/**', group: 'internal' }],
           'newlines-between': 'always',
           alphabetize: { order: 'asc', caseInsensitive: true },
