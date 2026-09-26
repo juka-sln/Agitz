@@ -9,6 +9,9 @@ import {
 } from '@xyflow/react';
 import { useEffect, useMemo } from 'react';
 
+import type { CommitGraph } from '@/application/queries/getCommitGraph';
+import { shortHash } from '@/domain/value-objects/Hash';
+
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCommitGraph } from '../../hooks/useWorkspaceViews';
 import { usePreferencesStore } from '../../stores/preferencesStore';
@@ -44,6 +47,27 @@ function FitViewOnChange({ signature }: { signature: string }) {
   return null;
 }
 
+/** Text alternative to the map for screen readers, read like `git log --oneline --all`. */
+function GraphSummary({ graph }: { graph: CommitGraph }) {
+  const { t } = useTranslation();
+  const head =
+    graph.head.type === 'attached'
+      ? graph.head.branch
+      : t('graph.summaryDetached', { commit: shortHash(graph.head.commit) });
+  return (
+    <div className="sr-only">
+      <p>{t('graph.summary', { count: graph.commits.length, head })}</p>
+      <ol>
+        {[...graph.commits].reverse().map((commit) => (
+          <li key={commit.hash}>
+            {[shortHash(commit.hash), commit.subject, ...commit.branches].join(', ')}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 export function CommitGraphView() {
   const { t } = useTranslation();
   const theme = usePreferencesStore((state) => state.theme);
@@ -75,6 +99,7 @@ export function CommitGraphView() {
 
   return (
     <div className="h-full w-full" role="region" aria-label={t('graph.label')}>
+      <GraphSummary graph={graph} />
       <ReactFlowProvider>
         <ReactFlow<StationNodeType>
           nodes={layout.nodes}
@@ -85,6 +110,15 @@ export function CommitGraphView() {
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
+          ariaLabelConfig={{
+            'controls.ariaLabel': t('graph.controls'),
+            'controls.zoomIn.ariaLabel': t('graph.zoomIn'),
+            'controls.zoomOut.ariaLabel': t('graph.zoomOut'),
+            'controls.fitView.ariaLabel': t('graph.fitView'),
+            'minimap.ariaLabel': t('graph.minimap'),
+          }}
+          nodesFocusable={false}
+          edgesFocusable={false}
           minZoom={0.2}
           maxZoom={1.6}
           fitView

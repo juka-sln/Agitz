@@ -40,4 +40,13 @@ describe('CommitGraphView', () => {
     expect(screen.getByText('feature')).toBeInTheDocument();
     expect(screen.getByTitle(/Tu es ici/)).toHaveTextContent('HEAD');
   });
+
+  it('offers a text summary for screen readers', async () => {
+    renderGraph(['git init', 'touch a', 'git add .', 'git commit -m "feat: add a"']);
+
+    expect(
+      await screen.findByText('Commits : 1, du plus récent au plus ancien. HEAD : main.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('listitem')).toHaveTextContent(/^[0-9a-f]{7}, feat: add a, main$/);
+  });
 });
