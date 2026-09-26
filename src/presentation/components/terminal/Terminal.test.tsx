@@ -81,4 +81,22 @@ describe('Terminal', () => {
     await user.keyboard('{Escape}');
     expect(input).not.toHaveFocus();
   });
+
+  it('shows a pending merge in the prompt like git-prompt', () => {
+    renderTerminal([
+      'git init',
+      'echo base > a.txt',
+      'git add .',
+      'git commit -m "feat: base"',
+      'git checkout -b feature',
+      'echo theirs > a.txt',
+      'git commit -am "feat: theirs"',
+      'git checkout main',
+      'echo ours > a.txt',
+      'git commit -am "feat: ours"',
+      'git merge feature',
+    ]);
+
+    expect(screen.getByRole('log')).toHaveTextContent('~/project (main|MERGING) $');
+  });
 });
