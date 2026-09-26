@@ -3,6 +3,7 @@ import {
   addCommit,
   advanceHead,
   getHeadCommitHash,
+  getCommit,
   getHeadTree,
   hasUnmergedPaths,
   type Repository,
@@ -24,6 +25,7 @@ import {
 import { formatDiffStat } from './support/diffStat';
 import { formatLongStatus } from './support/formatStatus';
 import { createCommitObject, stageWorkingTreePath } from './support/objects';
+import { sequenceMessage } from './support/sequencer';
 
 export interface CommitInput {
   /** Each `-m` value becomes a paragraph, like Git does. */
@@ -45,7 +47,9 @@ export class CommitCommand implements GitCommand<CommitInput> {
     if (hasUnmergedPaths(repository)) {
       throw new UnmergedFilesError('Committing');
     }
-    const pendingMerge = repository.operation?.type === 'merge' ? repository.operation : null;
+    const { operation } = repository;
+    const pendingMerge = operation?.type === 'merge' ? operation : null;
+    const pendingSequence = operation !== null && operation.type !== 'merge' ? operation : null;
 
     if (input.all === true) {
       repository = computeStatus(repository, workspace.files).unstaged.reduce(
@@ -75,10 +79,15 @@ export class CommitCommand implements GitCommand<CommitInput> {
     if (pendingMerge) {
       parents.push(pendingMerge.theirs);
     }
-    const message =
-      input.messages.length === 0 && pendingMerge
-        ? pendingMerge.message
-        : input.messages.join('\n\n');
+    let message = input.messages.join('\n\n');
+    if (input.messages.length === 0 && pendingMerge) {
+      message = pendingMerge.message;
+    } else if (input.messages.length === 0 && pendingSequence) {
+      message = sequenceMessage(
+        pendingSequence.type,
+        getCommit(repository, pendingSequence.current),
+      );
+    }
     const commit = createCommitObject(this.context.hasher, {
       tree: repository.index,
       parents,
@@ -86,7 +95,16 @@ export class CommitCommand implements GitCommand<CommitInput> {
       author: workspace.identity,
       timestamp: this.context.clock.now(),
     });
-    const next = { ...advanceHead(addCommit(repository, commit), commit.hash), operation: null };
+    // A rebase, or a sequence with commits left, keeps going with `--continue`.
+    const finishesOperation =
+      pendingMerge !== null ||
+      (pendingSequence !== null &&
+        pendingSequence.type !== 'rebase' &&
+        pendingSequence.todo.length === 0);
+    const next = {
+      ...advanceHead(addCommit(repository, commit), commit.hash),
+      operation: finishesOperation ? null : operation,
+    };
 
     return succeed(
       { ...workspace, repository: next },

@@ -107,3 +107,34 @@ export class MergeCommitWithoutMainlineError extends GitError {
     super(`error: commit ${commit} is a merge but no -m option was given.`, 128, { commit });
   }
 }
+
+export class BadRevisionError extends GitError {
+  readonly code = 'badRevision';
+
+  constructor(revision: string) {
+    super(`fatal: bad revision '${revision}'`, 128, { revision });
+  }
+}
+
+export class InvalidUpstreamError extends GitError {
+  readonly code = 'invalidUpstream';
+
+  constructor(upstream: string) {
+    super(`fatal: invalid upstream '${upstream}'`, 128, { upstream });
+  }
+}
+
+export class DirtyWorkingTreeError extends GitError {
+  readonly code = 'dirtyWorkingTree';
+
+  constructor(operation: string, staged: boolean) {
+    super(
+      [
+        `error: cannot ${operation}: ${staged ? 'Your index contains uncommitted changes.' : 'You have unstaged changes.'}`,
+        'error: Please commit or stash them.',
+      ].join('\n'),
+      1,
+      { operation },
+    );
+  }
+}
