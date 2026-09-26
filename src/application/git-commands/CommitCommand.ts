@@ -8,8 +8,9 @@ import {
   hasUnmergedPaths,
   type Repository,
 } from '@/domain/entities/Repository';
-import { treesAreEqual, type Tree } from '@/domain/entities/Tree';
+import { EMPTY_TREE, treesAreEqual, type Tree } from '@/domain/entities/Tree';
 import { requireRepository, type Workspace } from '@/domain/entities/Workspace';
+import { AmendDuringMergeError, NothingToAmendError } from '@/domain/errors/CommitErrors';
 import { UnmergedFilesError } from '@/domain/errors/OperationErrors';
 import { computeStatus } from '@/domain/services/status';
 import { commitSubject, createCommitMessage } from '@/domain/value-objects/CommitMessage';
@@ -23,6 +24,7 @@ import {
   type GitCommandContext,
 } from './GitCommand';
 import { formatDiffStat } from './support/diffStat';
+import { formatGitDate } from './support/formatDate';
 import { formatLongStatus } from './support/formatStatus';
 import { createCommitObject, stageWorkingTreePath } from './support/objects';
 import { sequenceMessage } from './support/sequencer';
@@ -33,6 +35,8 @@ export interface CommitInput {
   /** `-a`: stage modified and deleted tracked files before committing. */
   readonly all?: boolean;
   readonly allowEmpty?: boolean;
+  /** `--amend`: replace the last commit instead of adding a new one. */
+  readonly amend?: boolean;
 }
 
 export class CommitCommand implements GitCommand<CommitInput> {
@@ -57,6 +61,10 @@ export class CommitCommand implements GitCommand<CommitInput> {
           stageWorkingTreePath(this.context.hasher, current, workspace.files, change.path),
         repository,
       );
+    }
+
+    if (input.amend === true) {
+      return this.amend(workspace, repository, input.messages, pendingMerge !== null);
     }
 
     const headTree = getHeadTree(repository);
@@ -110,6 +118,49 @@ export class CommitCommand implements GitCommand<CommitInput> {
       { ...workspace, repository: next },
       this.formatOutput(next, commit, headTree),
       this.explainCommit(next, commit),
+    );
+  }
+
+  /** Rewrites HEAD: same parents and author, new tree and possibly a new message. */
+  private amend(
+    workspace: Workspace,
+    repository: Repository,
+    messages: readonly string[],
+    isMerging: boolean,
+  ): CommandOutcome {
+    if (isMerging) {
+      throw new AmendDuringMergeError();
+    }
+    const head = getHeadCommitHash(repository);
+    if (head === null) {
+      throw new NothingToAmendError();
+    }
+    const previous = getCommit(repository, head);
+    const commit = createCommitObject(this.context.hasher, {
+      tree: repository.index,
+      parents: previous.parents,
+      message:
+        messages.length === 0 ? previous.message : createCommitMessage(messages.join('\n\n')),
+      author: previous.author,
+      timestamp: previous.authoredAt,
+      committer: { identity: workspace.identity, timestamp: this.context.clock.now() },
+    });
+    const next = advanceHead(addCommit(repository, commit), commit.hash);
+    const parentTree =
+      previous.parents[0] === undefined
+        ? EMPTY_TREE
+        : getCommit(repository, previous.parents[0]).tree;
+
+    const { head: headRef } = next;
+    const label = headRef.type === 'attached' ? headRef.branch : 'detached HEAD';
+    return succeed(
+      { ...workspace, repository: next },
+      [
+        `[${label} ${shortHash(commit.hash)}] ${commitSubject(commit.message)}`,
+        ` Date: ${formatGitDate(commit.authoredAt)}`,
+        ...formatDiffStat(next, parentTree, commit.tree, { perFile: false }),
+      ].join('\n'),
+      explain('commit.amended', { hash: shortHash(commit.hash), previous: shortHash(head) }),
     );
   }
 
