@@ -92,3 +92,46 @@ describe('formatLocalChanges', () => {
     ]);
   });
 });
+
+describe('conflicts and pending operations', () => {
+  const conflicted = {
+    ...committed,
+    index: { 'src/lib.ts': committed.index['src/lib.ts'] ?? fakeHash('0') },
+    unmerged: { 'app.ts': { base: fakeHash('1'), ours: fakeHash('2'), theirs: fakeHash('3') } },
+    operation: {
+      type: 'merge' as const,
+      theirs: fakeHash('3'),
+      message: 'Merge',
+      origHead: fakeHash('a'),
+    },
+  };
+  const files = { 'app.ts': '<<<<<<< HEAD\n', 'src/lib.ts': 'lib\n' };
+
+  it('explains how to finish or abort a merge', () => {
+    expect(formatLongStatus(conflicted, computeStatus(conflicted, files))).toBe(
+      [
+        'On branch main',
+        'You have unmerged paths.',
+        '  (fix conflicts and run "git commit")',
+        '  (use "git merge --abort" to abort the merge)',
+        '',
+        'Unmerged paths:',
+        '  (use "git add <file>..." to mark resolution)',
+        '\tboth modified:   app.ts',
+        '',
+        'no changes added to commit (use "git add" and/or "git commit -a")',
+      ].join('\n'),
+    );
+  });
+
+  it('prints unmerged codes in the short format', () => {
+    expect(formatShortStatus(conflicted, computeStatus(conflicted, files))).toBe('UU app.ts');
+  });
+
+  it('says when all conflicts are fixed', () => {
+    const resolved = { ...conflicted, unmerged: {}, index: committed.index };
+    expect(formatLongStatus(resolved, computeStatus(resolved, cleanFiles))).toContain(
+      'All conflicts fixed but you are still merging.',
+    );
+  });
+});
