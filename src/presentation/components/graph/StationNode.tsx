@@ -9,10 +9,27 @@ import { STATION_SIZE, type StationNode as StationNodeType } from './layoutCommi
 
 const hiddenHandle = '!h-px !w-px !min-h-0 !min-w-0 !border-0 !bg-transparent';
 
+function TagIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true">
+      <path
+        d="M1 1h5l5 5-5 5-5-5z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <circle cx="4" cy="4" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
 function StationNodeView({ data }: NodeProps<StationNodeType>) {
   const { t } = useTranslation();
   const { commit, lineToken, headState, currentBranch, branchTokens } = data;
   const isHead = headState !== null;
+  const isMerge = commit.parents.length > 1;
+  const hasLabels = isHead || commit.branches.length > 0 || commit.tags.length > 0;
 
   return (
     <div
@@ -27,13 +44,21 @@ function StationNodeView({ data }: NodeProps<StationNodeType>) {
         isConnectable={false}
       />
       <div
-        className="h-full w-full rounded-full"
+        className="flex h-full w-full items-center justify-center rounded-full"
+        title={isMerge ? t('graph.mergeCommit') : undefined}
         style={{
           background: 'var(--station-fill)',
           border: `5px ${commit.isReachable ? 'solid' : 'dashed'} var(--${lineToken})`,
           boxShadow: isHead ? `0 0 0 3px var(--canvas), 0 0 0 6px var(--ink)` : undefined,
         }}
-      />
+      >
+        {isMerge && (
+          <span
+            className="block h-1.5 w-1.5 rounded-full"
+            style={{ background: `var(--${lineToken})` }}
+          />
+        )}
+      </div>
       <Handle
         type="source"
         position={Position.Right}
@@ -41,7 +66,7 @@ function StationNodeView({ data }: NodeProps<StationNodeType>) {
         isConnectable={false}
       />
 
-      {(isHead || commit.branches.length > 0) && (
+      {hasLabels && (
         <div className="absolute bottom-full left-1/2 mb-3 flex -translate-x-1/2 flex-col items-center gap-1">
           {isHead && (
             <span
@@ -70,6 +95,16 @@ function StationNodeView({ data }: NodeProps<StationNodeType>) {
               }}
             >
               {branch}
+            </span>
+          ))}
+          {commit.tags.map((tag) => (
+            <span
+              key={tag}
+              title={t('graph.tag')}
+              className="border-ink-muted bg-surface text-ink inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap"
+            >
+              <TagIcon />
+              {tag}
             </span>
           ))}
         </div>

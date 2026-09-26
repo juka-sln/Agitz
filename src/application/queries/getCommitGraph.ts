@@ -23,6 +23,7 @@ export interface GraphCommit {
   readonly lane: string | null;
   /** Branches whose tip is this commit. */
   readonly branches: readonly string[];
+  readonly tags: readonly string[];
   readonly isHead: boolean;
   /** False for commits no branch or HEAD can reach anymore (e.g. left behind in detached HEAD). */
   readonly isReachable: boolean;
@@ -74,6 +75,7 @@ export function getCommitGraph(repository: Repository): CommitGraph {
   const headCommit = getHeadCommitHash(repository);
   const reachable = collectReachableCommits(repository, [
     ...Object.values(repository.branches),
+    ...Object.values(repository.tags).map((tag) => tag.target),
     ...(headCommit === null ? [] : [headCommit]),
   ]);
   const lanes = assignLanes(repository);
@@ -86,6 +88,13 @@ export function getCommitGraph(repository: Repository): CommitGraph {
     }
   }
 
+  const tagsByCommit = new Map<Hash, string[]>();
+  for (const [name, tag] of Object.entries(repository.tags).sort(([left], [right]) =>
+    left.localeCompare(right),
+  )) {
+    tagsByCommit.set(tag.target, [...(tagsByCommit.get(tag.target) ?? []), name]);
+  }
+
   const commits = ordered.map((commit, column) => ({
     hash: commit.hash,
     subject: commitSubject(commit.message),
@@ -95,6 +104,7 @@ export function getCommitGraph(repository: Repository): CommitGraph {
     column,
     lane: lanes.get(commit.hash) ?? null,
     branches: tipsByCommit.get(commit.hash) ?? [],
+    tags: tagsByCommit.get(commit.hash) ?? [],
     isHead: commit.hash === headCommit,
     isReachable: reachable.has(commit.hash),
   }));

@@ -1,5 +1,6 @@
 import { BranchCommand } from '@/application/git-commands/BranchCommand';
 import { CheckoutCommand } from '@/application/git-commands/CheckoutCommand';
+import { TagCommand } from '@/application/git-commands/TagCommand';
 import { GitTestBench } from '@/test/fixtures/GitTestBench';
 
 import { DETACHED_LANE, getCommitGraph } from './getCommitGraph';
@@ -65,5 +66,21 @@ describe('getCommitGraph', () => {
       isReachable: false,
     });
     expect(graph.lanes).toEqual(['main']);
+  });
+
+  it('lists tags and keeps tagged commits reachable', () => {
+    const { bench } = setup();
+    bench.run(new TagCommand(bench.context), {
+      action: 'create',
+      name: 'v0.1.0',
+      target: 'feature',
+    });
+    bench.run(new BranchCommand(), { action: 'delete', names: ['feature'], force: true });
+    const graph = getCommitGraph(bench.repository);
+
+    expect(graph.commits.find((commit) => commit.subject === 'feat: c')).toMatchObject({
+      tags: ['v0.1.0'],
+      isReachable: true,
+    });
   });
 });
