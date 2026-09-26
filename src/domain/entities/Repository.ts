@@ -3,7 +3,11 @@ import type { Hash } from '../value-objects/Hash';
 
 import type { Commit } from './Commit';
 import { attachedHead, type Head } from './Head';
+import type { PendingOperation } from './PendingOperation';
+import type { StashEntry } from './StashEntry';
+import type { Tag } from './Tag';
 import { EMPTY_TREE, type Tree } from './Tree';
+import type { UnmergedEntry } from './UnmergedEntry';
 
 export const DEFAULT_INITIAL_BRANCH = 'main' as BranchName;
 
@@ -11,9 +15,15 @@ export interface Repository {
   readonly commits: Readonly<Record<string, Commit>>;
   readonly blobs: Readonly<Record<string, string>>;
   readonly branches: Readonly<Record<string, Hash>>;
+  readonly tags: Readonly<Record<string, Tag>>;
   readonly head: Head;
   /** The staging area: the snapshot that the next commit will record. */
   readonly index: Tree;
+  /** Conflicted paths, kept out of the index until resolved with `git add`. */
+  readonly unmerged: Readonly<Record<string, UnmergedEntry>>;
+  readonly operation: PendingOperation | null;
+  /** Newest first: `stash@{0}` is the first entry. */
+  readonly stash: readonly StashEntry[];
 }
 
 export function createEmptyRepository(initialBranch: BranchName): Repository {
@@ -21,8 +31,12 @@ export function createEmptyRepository(initialBranch: BranchName): Repository {
     commits: {},
     blobs: {},
     branches: {},
+    tags: {},
     head: attachedHead(initialBranch),
     index: EMPTY_TREE,
+    unmerged: {},
+    operation: null,
+    stash: [],
   };
 }
 
@@ -94,4 +108,12 @@ export function advanceHead(repository: Repository, hash: Hash): Repository {
     return { ...repository, head: { type: 'detached', commit: hash } };
   }
   return setBranch(repository, head.branch, hash);
+}
+
+export function hasUnmergedPaths(repository: Repository): boolean {
+  return Object.keys(repository.unmerged).length > 0;
+}
+
+export function findTag(repository: Repository, name: string): Tag | undefined {
+  return Object.hasOwn(repository.tags, name) ? repository.tags[name] : undefined;
 }

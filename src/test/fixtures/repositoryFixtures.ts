@@ -58,7 +58,11 @@ export function buildRepository(
     commits: commitObjects,
     blobs,
     branches,
+    tags: {},
     head,
     index: headCommit ? (commitObjects[headCommit]?.tree ?? {}) : {},
+    unmerged: {},
+    operation: null,
+    stash: [],
   };
 }
