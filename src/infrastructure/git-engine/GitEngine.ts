@@ -22,6 +22,8 @@ export interface GitEngine {
   /** Names of the Git commands the engine can run, for help and autocompletion. */
   readonly availableCommands: readonly string[];
   execute(commandLine: string, workspace: Workspace): CommandResult;
+  /** Runs `git <args>` from already tokenized arguments (without the leading `git`). */
+  executeArguments(args: readonly string[], workspace: Workspace): CommandResult;
 }
 
 function formatHelp(commands: readonly CliCommand[]): string {
@@ -94,6 +96,7 @@ export function createGitEngine(
 
   return {
     availableCommands: [...commandsByName.keys()],
+    executeArguments: executeGit,
     execute(commandLine, workspace) {
       let tokens: string[];
       try {

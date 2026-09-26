@@ -1,4 +1,4 @@
-import { ShellSyntaxError, tokenize } from './tokenize';
+import { ShellSyntaxError, tokenize, tokenizeShell } from './tokenize';
 
 describe('tokenize', () => {
   it.each([
@@ -21,5 +21,22 @@ describe('tokenize', () => {
 
   it('rejects unterminated quotes', () => {
     expect(() => tokenize('git commit -m "oops')).toThrow(ShellSyntaxError);
+  });
+});
+
+describe('tokenizeShell', () => {
+  it('recognizes unquoted output redirections', () => {
+    expect(tokenizeShell('echo hi>a.txt')).toEqual([
+      { type: 'word', value: 'echo' },
+      { type: 'word', value: 'hi' },
+      { type: 'redirect', append: false },
+      { type: 'word', value: 'a.txt' },
+    ]);
+    expect(tokenizeShell('echo "a > b" >> log')).toEqual([
+      { type: 'word', value: 'echo' },
+      { type: 'word', value: 'a > b' },
+      { type: 'redirect', append: true },
+      { type: 'word', value: 'log' },
+    ]);
   });
 });
