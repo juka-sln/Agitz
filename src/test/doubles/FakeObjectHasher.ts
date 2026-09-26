@@ -1,3 +1,4 @@
+import type { ObjectHasher } from '@/application/ports/ObjectHasher';
 import { toHash, type Hash } from '@/domain/value-objects/Hash';
 
 const FNV_OFFSET = 0x811c9dc5;
@@ -17,7 +18,7 @@ export function fakeContentHash(content: string): Hash {
   return toHash([1, 2, 3, 4, 5].map((seed) => fnv1a(content, seed)).join(''));
 }
 
-export class FakeObjectHasher {
+export class FakeObjectHasher implements ObjectHasher {
   hash(content: string): Hash {
     return fakeContentHash(content);
   }
