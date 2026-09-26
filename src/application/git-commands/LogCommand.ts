@@ -5,6 +5,7 @@ import { NoCommitsYetError } from '@/domain/errors/RepositoryErrors';
 import { listCommitsInLogOrder } from '@/domain/services/history';
 import { resolveRevision } from '@/domain/services/revision';
 import { commitSubject } from '@/domain/value-objects/CommitMessage';
+import { compareByteOrder } from '@/domain/value-objects/FilePath';
 import { shortHash, type Hash } from '@/domain/value-objects/Hash';
 import { formatIdentity } from '@/domain/value-objects/Identity';
 
@@ -18,25 +19,36 @@ export interface LogInput {
   readonly maxCount?: number | undefined;
 }
 
-/** Ref names shown next to each commit, e.g. `HEAD -> main, feature`. */
+/** Ref names shown next to each commit, e.g. `HEAD -> main, tag: v1.0, feature`. */
 function collectDecorations(repository: Repository): Map<Hash, string[]> {
   const decorations = new Map<Hash, string[]>();
+  const add = (hash: Hash, label: string) => {
+    decorations.set(hash, [...(decorations.get(hash) ?? []), label]);
+  };
   const { head } = repository;
+  const byName = ([left]: [string, unknown], [right]: [string, unknown]) =>
+    compareByteOrder(left, right);
 
-  for (const [branch, hash] of Object.entries(repository.branches).sort(([left], [right]) =>
-    left.localeCompare(right),
-  )) {
-    const labels = decorations.get(hash) ?? [];
-    if (head.type === 'attached' && head.branch === branch) {
-      labels.unshift(`HEAD -> ${branch}`);
-    } else {
-      labels.push(branch);
-    }
-    decorations.set(hash, labels);
-  }
   if (head.type === 'detached') {
-    decorations.set(head.commit, ['HEAD', ...(decorations.get(head.commit) ?? [])]);
+    add(head.commit, 'HEAD');
+  } else {
+    const current = repository.branches[head.branch];
+    if (current !== undefined) {
+      add(current, `HEAD -> ${head.branch}`);
+    }
   }
+  Object.entries(repository.tags)
+    .sort(byName)
+    .forEach(([name, tag]) => {
+      add(tag.target, `tag: ${name}`);
+    });
+  Object.entries(repository.branches)
+    .sort(byName)
+    .forEach(([name, hash]) => {
+      if (head.type !== 'attached' || head.branch !== name) {
+        add(hash, name);
+      }
+    });
   return decorations;
 }
 

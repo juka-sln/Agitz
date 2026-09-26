@@ -59,4 +59,14 @@ describe('resolveRevision', () => {
     const empty = buildRepository([], {});
     expect(tryResolveRevision(empty, 'HEAD')).toBeNull();
   });
+
+  it('resolves tags before branches', () => {
+    const tagged = {
+      ...repository,
+      tags: { v1: { target: B, annotation: null }, feature: { target: C, annotation: null } },
+    };
+
+    expect(resolveRevision(tagged, 'v1~1')).toBe(A);
+    expect(resolveRevision(tagged, 'feature')).toBe(C);
+  });
 });
