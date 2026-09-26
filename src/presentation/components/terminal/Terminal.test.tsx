@@ -67,4 +67,18 @@ describe('Terminal', () => {
     await user.type(input, 'git status{Enter}');
     expect(screen.getByText(/^fatal: not a git repository/)).toHaveClass('text-terminal-error');
   });
+
+  it('never traps keyboard focus', async () => {
+    const user = userEvent.setup();
+    render(<button type="button">after</button>);
+    const { input } = renderTerminal();
+
+    input.focus();
+    await user.tab();
+    expect(input).not.toHaveFocus();
+
+    input.focus();
+    await user.keyboard('{Escape}');
+    expect(input).not.toHaveFocus();
+  });
 });

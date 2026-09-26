@@ -33,6 +33,8 @@ const fr = {
   'terminal.welcome.body':
     'Ce terminal simule un vrai shell avec Git. Tape help pour voir les commandes, ou commence par :',
   'terminal.completions': 'Suggestions :',
+  'terminal.keyboardHelp':
+    'Entrée exécute la commande, flèches haut et bas pour l’historique, Tab complète une commande commencée, Échap quitte le terminal.',
 } as const;
 
 export type MessageKey = keyof typeof fr;
@@ -68,6 +70,8 @@ const en: Record<MessageKey, string> = {
   'terminal.welcome.body':
     'This terminal simulates a real shell with Git. Type help to list the commands, or start with:',
   'terminal.completions': 'Suggestions:',
+  'terminal.keyboardHelp':
+    'Enter runs the command, up and down arrows browse history, Tab completes a started command, Escape leaves the terminal.',
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = { fr, en };

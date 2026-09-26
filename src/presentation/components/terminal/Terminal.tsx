@@ -54,11 +54,15 @@ export function Terminal() {
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       recallHistory(1);
-    } else if (event.key === 'Tab') {
+    } else if (event.key === 'Tab' && !event.shiftKey && input.trim() !== '') {
+      // With an empty line, Tab moves focus as usual so the terminal never traps the keyboard.
       event.preventDefault();
       const completed = completeInput(input, complete(input));
       setInput(completed.input);
       setSuggestions(completed.suggestions);
+    } else if (event.key === 'Escape') {
+      setSuggestions([]);
+      inputRef.current?.blur();
     } else if (event.ctrlKey && event.key === 'l') {
       event.preventDefault();
       clear();
@@ -104,6 +108,9 @@ export function Terminal() {
             {t('terminal.completions')} {suggestions.join('  ')}
           </p>
         )}
+        <p id="terminal-keyboard-help" className="sr-only">
+          {t('terminal.keyboardHelp')}
+        </p>
         <div className="flex">
           <Prompt workspace={workspace} />
           <input
@@ -115,6 +122,7 @@ export function Terminal() {
             }}
             onKeyDown={handleKeyDown}
             aria-label={t('terminal.inputLabel')}
+            aria-describedby="terminal-keyboard-help"
             className="text-terminal-ink caret-terminal-success min-w-0 flex-1 bg-transparent outline-none"
             spellCheck={false}
             autoComplete="off"
