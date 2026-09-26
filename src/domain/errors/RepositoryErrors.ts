@@ -47,3 +47,11 @@ export class InvalidObjectNameError extends GitError {
     super(`fatal: not a valid object name: '${name}'`, 128, { name });
   }
 }
+
+export class InvalidReferenceError extends GitError {
+  readonly code = 'invalidReference';
+
+  constructor(reference: string) {
+    super(`fatal: invalid reference: ${reference}`, 128, { reference });
+  }
+}

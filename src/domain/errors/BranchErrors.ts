@@ -80,3 +80,15 @@ export class DetachedHeadRenameError extends GitError {
     super('fatal: cannot rename the current branch while not on any branch', 128);
   }
 }
+
+export class InvalidStartPointError extends GitError {
+  readonly code = 'invalidStartPoint';
+
+  constructor(startPoint: string, branch: string) {
+    super(
+      `fatal: '${startPoint}' is not a commit and a branch '${branch}' cannot be created from it`,
+      128,
+      { startPoint, branch },
+    );
+  }
+}
