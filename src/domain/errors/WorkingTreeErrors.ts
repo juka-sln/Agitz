@@ -24,6 +24,11 @@ export class PathspecNotKnownError extends GitError {
   }
 }
 
+/** How Git ends its "would be overwritten" advice depending on the command. */
+function beforeYou(operation: string): string {
+  return operation === 'checkout' ? 'before you switch branches.' : 'before you merge.';
+}
+
 export class LocalChangesWouldBeOverwrittenError extends GitError {
   readonly code = 'localChangesWouldBeOverwritten';
 
@@ -32,7 +37,7 @@ export class LocalChangesWouldBeOverwrittenError extends GitError {
       [
         `error: Your local changes to the following files would be overwritten by ${operation}:`,
         ...paths.map((path) => `\t${path}`),
-        `Please commit your changes or stash them before you switch branches.`,
+        `Please commit your changes or stash them ${beforeYou(operation)}`,
         'Aborting',
       ].join('\n'),
       1,
@@ -49,7 +54,7 @@ export class UntrackedFilesWouldBeOverwrittenError extends GitError {
       [
         `error: The following untracked working tree files would be overwritten by ${operation}:`,
         ...paths.map((path) => `\t${path}`),
-        'Please move or remove them before you switch branches.',
+        `Please move or remove them ${beforeYou(operation)}`,
         'Aborting',
       ].join('\n'),
       1,
