@@ -1,14 +1,18 @@
 export class ShellSyntaxError extends Error {}
 
+export type ShellToken =
+  | { readonly type: 'word'; readonly value: string }
+  | { readonly type: 'redirect'; readonly append: boolean };
+
 const ESCAPABLE_IN_DOUBLE_QUOTES = new Set(['"', '\\', '$', '`']);
 
 /**
- * Splits a command line into arguments like a POSIX shell: whitespace separates
- * arguments, single quotes are literal, double quotes allow `\"`, and a backslash
- * outside quotes escapes the next character.
+ * Splits a command line like a POSIX shell: whitespace separates arguments,
+ * single quotes are literal, double quotes allow `\"`, a backslash outside quotes
+ * escapes the next character, and unquoted `>` / `>>` are output redirections.
  */
-export function tokenize(line: string): string[] {
-  const tokens: string[] = [];
+export function tokenizeShell(line: string): ShellToken[] {
+  const tokens: ShellToken[] = [];
   let current = '';
   let inToken = false;
   let quote: "'" | '"' | null = null;
@@ -39,11 +43,16 @@ export function tokenize(line: string): string[] {
       current += next;
       index += 1;
       inToken = true;
-    } else if (/\s/.test(character)) {
+    } else if (/\s/.test(character) || character === '>') {
       if (inToken) {
-        tokens.push(current);
+        tokens.push({ type: 'word', value: current });
         current = '';
         inToken = false;
+      }
+      if (character === '>') {
+        const append = next === '>';
+        tokens.push({ type: 'redirect', append });
+        index += append ? 1 : 0;
       }
     } else {
       current += character;
@@ -55,7 +64,17 @@ export function tokenize(line: string): string[] {
     throw new ShellSyntaxError(`unexpected EOF while looking for matching \`${quote}'`);
   }
   if (inToken) {
-    tokens.push(current);
+    tokens.push({ type: 'word', value: current });
   }
   return tokens;
+}
+
+/** Arguments only: redirections are kept as their literal `>` / `>>` text. */
+export function tokenize(line: string): string[] {
+  return tokenizeShell(line).map((token) => {
+    if (token.type === 'word') {
+      return token.value;
+    }
+    return token.append ? '>>' : '>';
+  });
 }
