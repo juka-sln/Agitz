@@ -22,7 +22,7 @@ export function splitLines(content: string): string[] {
 }
 
 /** `lengthAt(i, j)` is the length of the longest common subsequence of `before[i..]` and `after[j..]`. */
-function longestCommonSubsequence(before: string[], after: string[]) {
+function longestCommonSubsequence(before: readonly string[], after: readonly string[]) {
   const width = after.length + 1;
   const table = new Uint32Array((before.length + 1) * width);
   const lengthAt = (i: number, j: number) => table[i * width + j] ?? 0;
@@ -40,9 +40,13 @@ function longestCommonSubsequence(before: string[], after: string[]) {
 
 /** Line-based diff built on the longest common subsequence, after trimming the shared prefix and suffix. */
 export function diffLines(beforeContent: string, afterContent: string): LineOperation[] {
-  const before = splitLines(beforeContent);
-  const after = splitLines(afterContent);
+  return diffLineArrays(splitLines(beforeContent), splitLines(afterContent));
+}
 
+export function diffLineArrays(
+  before: readonly string[],
+  after: readonly string[],
+): LineOperation[] {
   let prefixLength = 0;
   while (
     prefixLength < before.length &&

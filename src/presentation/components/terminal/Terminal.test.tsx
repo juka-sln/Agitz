@@ -52,12 +52,12 @@ describe('Terminal', () => {
     const user = userEvent.setup();
     const { input } = renderTerminal(['git init']);
 
-    await user.type(input, 'git sta{Tab}');
+    await user.type(input, 'git stat{Tab}');
     expect(input).toHaveValue('git status ');
 
     await user.clear(input);
     await user.type(input, 'git c{Tab}');
-    expect(screen.getByText(/Suggestions/)).toHaveTextContent('checkout commit');
+    expect(screen.getByText(/Suggestions/)).toHaveTextContent('checkout cherry-pick commit');
   });
 
   it('marks errors', async () => {
@@ -80,5 +80,23 @@ describe('Terminal', () => {
     input.focus();
     await user.keyboard('{Escape}');
     expect(input).not.toHaveFocus();
+  });
+
+  it('shows a pending merge in the prompt like git-prompt', () => {
+    renderTerminal([
+      'git init',
+      'echo base > a.txt',
+      'git add .',
+      'git commit -m "feat: base"',
+      'git checkout -b feature',
+      'echo theirs > a.txt',
+      'git commit -am "feat: theirs"',
+      'git checkout main',
+      'echo ours > a.txt',
+      'git commit -am "feat: ours"',
+      'git merge feature',
+    ]);
+
+    expect(screen.getByRole('log')).toHaveTextContent('~/project (main|MERGING) $');
   });
 });

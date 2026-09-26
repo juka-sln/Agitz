@@ -98,4 +98,32 @@ describe('CommitCommand', () => {
     expect(result.exitCode).toBe(0);
     expect(result.output).toMatch(/^\[main [0-9a-f]{7}\] ci: trigger build$/);
   });
+
+  it('amends the last commit, keeping its parent and author date', () => {
+    const { bench, add, commit } = setup();
+    const first = bench.commit('feat: add a', { 'a.txt': 'a' });
+    bench.commit('feat: add b', { 'b.txt': 'b' });
+    const original = bench.headCommit;
+    bench.write({ 'c.txt': 'forgotten' });
+    bench.run(add, { pathspecs: ['c.txt'] });
+    const result = bench.run(commit, { messages: ['feat: add b and c'], amend: true });
+
+    expect(result.output).toMatch(
+      /^\[main [0-9a-f]{7}\] feat: add b and c\n Date: Thu Jan 15 10:01:00 2026 \+0100\n 2 files changed, 2 insertions\(\+\)/,
+    );
+    expect(bench.headCommit.parents).toEqual(first.diffState.createdCommits);
+    expect(bench.headCommit.authoredAt).toEqual(original.authoredAt);
+    expect(Object.keys(bench.headCommit.tree).sort()).toEqual(['a.txt', 'b.txt', 'c.txt']);
+  });
+
+  it('keeps the previous message when amending without -m', () => {
+    const { bench, commit } = setup();
+    bench.commit('feat: add a', { 'a.txt': 'a' });
+    bench.run(commit, { messages: [], amend: true });
+
+    expect(bench.headCommit.message).toBe('feat: add a');
+    expect(new GitTestBench().init().run(commit, { messages: [], amend: true }).output).toBe(
+      'fatal: You have nothing to amend.',
+    );
+  });
 });

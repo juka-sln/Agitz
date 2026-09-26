@@ -33,12 +33,19 @@ function resolveCssColor(value: string): string {
 }
 const edgeTypes = { transit: TransitEdge };
 
+/** Keeps stations clear of the badges above them, the labels below and the minimap on the right. */
+const FIT_VIEW_OPTIONS = {
+  padding: { top: '96px', right: '300px', bottom: '88px', left: '88px' },
+  maxZoom: 1,
+  minZoom: 0.4,
+} as const;
+
 /** Re-frames the map whenever a commit appears or HEAD moves. */
 function FitViewOnChange({ signature }: { signature: string }) {
   const { fitView } = useReactFlow();
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      void fitView({ duration: 400, padding: 0.3, maxZoom: 1, minZoom: 0.4 });
+      void fitView({ ...FIT_VIEW_OPTIONS, duration: 400 });
     });
     return () => {
       cancelAnimationFrame(frame);
@@ -122,6 +129,7 @@ export function CommitGraphView() {
           minZoom={0.2}
           maxZoom={1.6}
           fitView
+          fitViewOptions={FIT_VIEW_OPTIONS}
         >
           <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--rule)" />
           <Controls showInteractive={false} position="bottom-left" />

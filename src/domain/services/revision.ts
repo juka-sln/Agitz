@@ -1,4 +1,10 @@
-import { findBranch, getCommit, getHeadCommitHash, type Repository } from '../entities/Repository';
+import {
+  findBranch,
+  findTag,
+  getCommit,
+  getHeadCommitHash,
+  type Repository,
+} from '../entities/Repository';
 import { AmbiguousRevisionError, UnknownRevisionError } from '../errors/RepositoryErrors';
 import type { Hash } from '../value-objects/Hash';
 
@@ -13,6 +19,12 @@ function resolveBase(repository: Repository, base: string, revision: string): Ha
       throw new UnknownRevisionError(revision);
     }
     return head;
+  }
+
+  // Like `git rev-parse`, tags take precedence over branches with the same name.
+  const tag = findTag(repository, base);
+  if (tag !== undefined) {
+    return tag.target;
   }
 
   const branch = findBranch(repository, base);

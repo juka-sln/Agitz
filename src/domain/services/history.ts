@@ -70,3 +70,23 @@ export function listCommitsInLogOrder(repository: Repository, starts: readonly H
   }
   return ordered;
 }
+
+/**
+ * The best common ancestor of two commits, the starting point of a three-way merge:
+ * a common ancestor that is not itself an ancestor of another common ancestor.
+ */
+export function findMergeBase(repository: Repository, left: Hash, right: Hash): Hash | null {
+  const leftAncestors = collectReachableCommits(repository, [left]);
+  const common = [...collectReachableCommits(repository, [right])].filter((hash) =>
+    leftAncestors.has(hash),
+  );
+  const best = common.filter(
+    (candidate) =>
+      !common.some((other) => other !== candidate && isAncestor(repository, candidate, other)),
+  );
+  return (
+    best
+      .map((hash) => getCommit(repository, hash))
+      .sort((a, b) => b.committedAt.epochSeconds - a.committedAt.epochSeconds)[0]?.hash ?? null
+  );
+}

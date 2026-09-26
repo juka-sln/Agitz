@@ -2,7 +2,7 @@ import type { WorkingTreeEntry } from '@/application/queries/getWorkingTreeEntri
 
 import type { MessageKey } from '../../i18n/messages';
 
-export type BadgeTone = 'staged' | 'modified' | 'untracked' | 'deleted';
+export type BadgeTone = 'staged' | 'modified' | 'untracked' | 'deleted' | 'conflict';
 
 export interface StatusBadge {
   readonly letter: string;
@@ -12,6 +12,9 @@ export interface StatusBadge {
 
 /** The letters of `git status --short`: first what is staged, then what only exists on disk. */
 export function statusBadges(entry: WorkingTreeEntry): StatusBadge[] {
+  if (entry.conflict !== null) {
+    return [{ letter: 'C', tone: 'conflict', label: 'files.status.conflict' }];
+  }
   const badges: StatusBadge[] = [];
   if (entry.staged === 'added') {
     badges.push({ letter: 'A', tone: 'staged', label: 'files.status.stagedAdded' });

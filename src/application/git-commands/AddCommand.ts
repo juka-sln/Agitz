@@ -44,7 +44,7 @@ export class AddCommand implements GitCommand<AddInput> {
     const pathspecs = (input.pathspecs.length > 0 ? input.pathspecs : ['.']).map((raw) =>
       parsePathspec(raw, workspace.path),
     );
-    const trackedPaths = Object.keys(repository.index);
+    const trackedPaths = [...Object.keys(repository.index), ...Object.keys(repository.unmerged)];
     const candidates =
       input.update === true
         ? trackedPaths
@@ -67,16 +67,23 @@ export class AddCommand implements GitCommand<AddInput> {
         repository,
       );
     const changes = diffTrees(repository.index, staged.index);
+    // Staging a conflicted path is how Git marks the conflict as resolved.
+    const unmerged = Object.fromEntries(
+      Object.entries(repository.unmerged).filter(([path]) => !matchedPaths.has(path)),
+    );
+    const resolved = Object.keys(repository.unmerged).length - Object.keys(unmerged).length;
 
     return succeed(
-      { ...workspace, repository: staged },
+      { ...workspace, repository: { ...staged, unmerged } },
       '',
-      changes.length === 0
-        ? explain('add.nothingChanged')
-        : explain('add.staged', {
-            count: changes.length,
-            paths: changes.map((change) => change.path).join(', '),
-          }),
+      resolved > 0
+        ? explain('add.resolvedConflicts', { count: resolved })
+        : changes.length === 0
+          ? explain('add.nothingChanged')
+          : explain('add.staged', {
+              count: changes.length,
+              paths: changes.map((change) => change.path).join(', '),
+            }),
     );
   }
 }

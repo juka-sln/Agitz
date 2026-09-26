@@ -1,3 +1,4 @@
+import type { UnmergedType } from '@/domain/entities/UnmergedEntry';
 import type { Workspace } from '@/domain/entities/Workspace';
 import { computeStatus } from '@/domain/services/status';
 import type { FileChangeType } from '@/domain/value-objects/FileChange';
@@ -9,6 +10,8 @@ export interface WorkingTreeEntry {
   readonly staged: FileChangeType | null;
   /** Change on disk compared to the index, or `untracked` for files Git does not know. */
   readonly unstaged: FileChangeType | 'untracked' | null;
+  /** Set while the file has a merge conflict waiting to be resolved. */
+  readonly conflict: UnmergedType | null;
 }
 
 /** Every file of the project, including tracked files deleted from disk, with its Git state. */
@@ -17,16 +20,20 @@ export function getWorkingTreeEntries(workspace: Workspace): WorkingTreeEntry[] 
   if (!repository) {
     return Object.keys(workspace.files)
       .sort(compareByteOrder)
-      .map((path) => ({ path, staged: null, unstaged: null }));
+      .map((path) => ({ path, staged: null, unstaged: null, conflict: null }));
   }
 
   const status = computeStatus(repository, workspace.files);
   const entries = new Map<
     string,
-    { staged: FileChangeType | null; unstaged: WorkingTreeEntry['unstaged'] }
+    {
+      staged: FileChangeType | null;
+      unstaged: WorkingTreeEntry['unstaged'];
+      conflict: UnmergedType | null;
+    }
   >();
   const entryFor = (path: string) => {
-    const entry = entries.get(path) ?? { staged: null, unstaged: null };
+    const entry = entries.get(path) ?? { staged: null, unstaged: null, conflict: null };
     entries.set(path, entry);
     return entry;
   };
@@ -40,6 +47,9 @@ export function getWorkingTreeEntries(workspace: Workspace): WorkingTreeEntry[] 
   });
   status.untracked.forEach((path) => {
     entryFor(path).unstaged = 'untracked';
+  });
+  status.unmerged.forEach(({ path, type }) => {
+    entryFor(path).conflict = type;
   });
 
   return [...entries.entries()]

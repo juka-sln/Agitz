@@ -1,6 +1,11 @@
 import { buildRepository, fakeHash } from '@/test/fixtures/repositoryFixtures';
 
-import { collectReachableCommits, isAncestor, listCommitsInLogOrder } from './history';
+import {
+  collectReachableCommits,
+  findMergeBase,
+  isAncestor,
+  listCommitsInLogOrder,
+} from './history';
 
 const A = fakeHash('a');
 const B = fakeHash('b');
@@ -52,5 +57,16 @@ describe('history', () => {
       { main: C },
     );
     expect(listCommitsInLogOrder(skewed, [C]).map((commit) => commit.hash)).toEqual([C, B, A]);
+  });
+
+  it('finds the merge base of two diverged commits', () => {
+    expect(findMergeBase(repository, C, D)).toBe(B);
+    expect(findMergeBase(repository, M, D)).toBe(D);
+    expect(findMergeBase(repository, A, A)).toBe(A);
+  });
+
+  it('has no merge base for unrelated histories', () => {
+    const unrelated = buildRepository([{ hash: A }, { hash: B }], { main: A, other: B });
+    expect(findMergeBase(unrelated, A, B)).toBeNull();
   });
 });
