@@ -62,3 +62,11 @@ export class UntrackedFilesWouldBeOverwrittenError extends GitError {
     );
   }
 }
+
+export class ResetWithPathsError extends GitError {
+  readonly code = 'resetWithPaths';
+
+  constructor(mode: 'soft' | 'hard') {
+    super(`fatal: Cannot do ${mode} reset with paths.`, 128, { mode });
+  }
+}
