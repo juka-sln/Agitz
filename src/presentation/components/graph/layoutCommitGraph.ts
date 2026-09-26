@@ -16,15 +16,16 @@ export type HeadState = 'attached' | 'detached' | null;
 
 export interface StationData extends Record<string, unknown> {
   readonly commit: GraphCommit;
-  readonly color: string;
+  /** Name of the line color token, e.g. `line-0`; `--<token>-ink` is its readable text color. */
+  readonly lineToken: string;
   readonly headState: HeadState;
   readonly currentBranch: string | null;
-  /** Line color of each branch whose tip is this commit. */
-  readonly branchColors: Readonly<Record<string, string>>;
+  /** Line token of each branch whose tip is this commit. */
+  readonly branchTokens: Readonly<Record<string, string>>;
 }
 
 export interface TransitEdgeData extends Record<string, unknown> {
-  readonly color: string;
+  readonly lineToken: string;
   /** Where the diagonal sits: right after a fork (source) or right before a merge (target). */
   readonly bend: 'source' | 'target';
   /** Shifts the vertical drop so parallel lines forking from one station stay distinct. */
@@ -35,15 +36,12 @@ export interface TransitEdgeData extends Record<string, unknown> {
 export type StationNode = Node<StationData, 'station'>;
 export type TransitEdge = Edge<TransitEdgeData, 'transit'>;
 
-export function laneColor(lane: string | null, lanes: readonly string[]): string {
-  if (lane === null) {
-    return 'var(--line-none)';
-  }
+export function laneToken(lane: string | null, lanes: readonly string[]): string {
   if (lane === DETACHED_LANE) {
-    return 'var(--line-detached)';
+    return 'line-detached';
   }
-  const index = lanes.indexOf(lane);
-  return index === -1 ? 'var(--line-none)' : `var(--line-${index % LINE_COLOR_COUNT})`;
+  const index = lane === null ? -1 : lanes.indexOf(lane);
+  return index === -1 ? 'line-none' : `line-${index % LINE_COLOR_COUNT}`;
 }
 
 /**
@@ -70,13 +68,13 @@ export function layoutCommitGraph(graph: CommitGraph): {
     connectable: false,
     data: {
       commit,
-      color: laneColor(commit.lane, graph.lanes),
+      lineToken: laneToken(commit.lane, graph.lanes),
       headState: commit.isHead ? headState : null,
       currentBranch,
-      branchColors: Object.fromEntries(
+      branchTokens: Object.fromEntries(
         commit.branches.map((branch) => [
           branch,
-          laneColor(graph.lanes.includes(branch) ? branch : null, graph.lanes),
+          laneToken(graph.lanes.includes(branch) ? branch : null, graph.lanes),
         ]),
       ),
     },
@@ -102,7 +100,7 @@ export function layoutCommitGraph(graph: CommitGraph): {
           target: commit.hash,
           type: 'transit',
           data: {
-            color: laneColor(isFirstParent ? commit.lane : parent.lane, graph.lanes),
+            lineToken: laneToken(isFirstParent ? commit.lane : parent.lane, graph.lanes),
             bend: isFirstParent ? 'source' : 'target',
             offset: forkIndex * PARALLEL_LINE_SPACING,
             faded: !commit.isReachable,

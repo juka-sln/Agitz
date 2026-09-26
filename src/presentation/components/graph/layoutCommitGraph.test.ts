@@ -26,14 +26,14 @@ describe('layoutCommitGraph', () => {
   it('colors each lane and marks HEAD on the current commit', () => {
     const { nodes, edges } = layoutCommitGraph(forkedGraph());
 
-    expect(nodes.map((node) => [node.data.color, node.data.headState])).toEqual([
-      ['var(--line-0)', null],
-      ['var(--line-1)', 'attached'],
+    expect(nodes.map((node) => [node.data.lineToken, node.data.headState])).toEqual([
+      ['line-0', null],
+      ['line-1', 'attached'],
     ]);
-    expect(nodes[1]?.data.branchColors).toEqual({ feature: 'var(--line-1)' });
+    expect(nodes[1]?.data.branchTokens).toEqual({ feature: 'line-1' });
     expect(edges).toHaveLength(1);
     expect(edges[0]?.data).toEqual({
-      color: 'var(--line-1)',
+      lineToken: 'line-1',
       bend: 'source',
       offset: 0,
       faded: false,

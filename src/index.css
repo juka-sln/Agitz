@@ -47,18 +47,27 @@
   --terminal-success: #56d364;
   --terminal-accent: #79b8ff;
 
+  /* Each line comes with the text color that stays readable on it (WCAG AA). */
   --line-0: #2f6fd6;
-  --line-1: #1e8f4e;
-  --line-2: #d99700;
+  --line-0-ink: #ffffff;
+  --line-1: #187a42;
+  --line-1-ink: #ffffff;
+  --line-2: #b07a00;
+  --line-2-ink: #0f1824;
   --line-3: #a93aa6;
-  --line-4: #0f8a9c;
+  --line-3-ink: #ffffff;
+  --line-4: #0b7383;
+  --line-4-ink: #ffffff;
   --line-5: #c93a33;
-  --line-none: #8a96a8;
+  --line-5-ink: #ffffff;
+  --line-none: #646f82;
+  --line-none-ink: #ffffff;
   --line-detached: #5b6678;
+  --line-detached-ink: #ffffff;
   --station-fill: #ffffff;
 
-  --status-staged: #1e8f4e;
-  --status-modified: #b87d00;
+  --status-staged: #187a42;
+  --status-modified: #8f6200;
   --status-untracked: #c93a33;
   --status-deleted: #c93a33;
 
@@ -77,13 +86,21 @@
   --terminal-bg: #0f1824;
 
   --line-0: #3b82f6;
+  --line-0-ink: #0f1824;
   --line-1: #22a55b;
+  --line-1-ink: #0f1824;
   --line-2: #f2a900;
-  --line-3: #c04abc;
+  --line-2-ink: #0f1824;
+  --line-3: #d46bd1;
+  --line-3-ink: #0f1824;
   --line-4: #14a3b8;
-  --line-5: #e0443c;
-  --line-none: #6b7a8f;
+  --line-4-ink: #0f1824;
+  --line-5: #f0665e;
+  --line-5-ink: #0f1824;
+  --line-none: #8492a6;
+  --line-none-ink: #0f1824;
   --line-detached: #93a1b5;
+  --line-detached-ink: #0f1824;
   --station-fill: #16202e;
 
   --status-staged: #3fbf74;

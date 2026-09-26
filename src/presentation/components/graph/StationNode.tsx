@@ -11,7 +11,7 @@ const hiddenHandle = '!h-px !w-px !min-h-0 !min-w-0 !border-0 !bg-transparent';
 
 function StationNodeView({ data }: NodeProps<StationNodeType>) {
   const { t } = useTranslation();
-  const { commit, color, headState, currentBranch, branchColors } = data;
+  const { commit, lineToken, headState, currentBranch, branchTokens } = data;
   const isHead = headState !== null;
 
   return (
@@ -30,7 +30,7 @@ function StationNodeView({ data }: NodeProps<StationNodeType>) {
         className="h-full w-full rounded-full"
         style={{
           background: 'var(--station-fill)',
-          border: `5px ${commit.isReachable ? 'solid' : 'dashed'} ${color}`,
+          border: `5px ${commit.isReachable ? 'solid' : 'dashed'} var(--${lineToken})`,
           boxShadow: isHead ? `0 0 0 3px var(--canvas), 0 0 0 6px var(--ink)` : undefined,
         }}
       />
@@ -59,9 +59,10 @@ function StationNodeView({ data }: NodeProps<StationNodeType>) {
           {commit.branches.map((branch) => (
             <span
               key={branch}
-              className="rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-white"
+              className="rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap"
               style={{
-                background: branchColors[branch],
+                background: `var(--${branchTokens[branch] ?? 'line-none'})`,
+                color: `var(--${branchTokens[branch] ?? 'line-none'}-ink)`,
                 boxShadow:
                   headState === 'attached' && branch === currentBranch
                     ? '0 0 0 2px var(--canvas), 0 0 0 4px var(--ink)'

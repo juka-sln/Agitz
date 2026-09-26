@@ -10,7 +10,7 @@ export function TransitEdge({
   targetY,
   data,
 }: EdgeProps<TransitEdgeType>) {
-  const color = data?.color ?? 'var(--line-none)';
+  const color = `var(--${data?.lineToken ?? 'line-none'})`;
   const faded = data?.faded ?? false;
   return (
     <BaseEdge

@@ -95,7 +95,9 @@ export function CommitGraphView() {
             pannable
             zoomable
             position="bottom-right"
-            nodeColor={(node) => resolveCssColor((node as StationNodeType).data.color)}
+            nodeColor={(node) =>
+              resolveCssColor(`var(--${(node as StationNodeType).data.lineToken})`)
+            }
             nodeBorderRadius={999}
           />
           <FitViewOnChange signature={`${graph.commits.length}:${graph.headCommit ?? ''}`} />
