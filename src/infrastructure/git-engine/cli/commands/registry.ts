@@ -8,7 +8,13 @@ import { createCheckoutCliCommand } from './checkoutCliCommand';
 import { createCommitCliCommand } from './commitCliCommand';
 import { createInitCliCommand } from './initCliCommand';
 import { createLogCliCommand } from './logCliCommand';
+import { createMergeCliCommand } from './mergeCliCommand';
+import { createRebaseCliCommand } from './rebaseCliCommand';
+import { createResetCliCommand } from './resetCliCommand';
+import { createCherryPickCliCommand, createRevertCliCommand } from './sequenceCliCommands';
+import { createStashCliCommand } from './stashCliCommand';
 import { createStatusCliCommand } from './statusCliCommand';
+import { createTagCliCommand } from './tagCliCommand';
 
 export function createCliCommands(context: GitCommandContext): CliCommand[] {
   return [
@@ -19,6 +25,13 @@ export function createCliCommands(context: GitCommandContext): CliCommand[] {
     createLogCliCommand(),
     createBranchCliCommand(),
     createCheckoutCliCommand(context),
+    createMergeCliCommand(context),
+    createRebaseCliCommand(context),
+    createCherryPickCliCommand(context),
+    createResetCliCommand(),
+    createRevertCliCommand(context),
+    createStashCliCommand(context),
+    createTagCliCommand(context),
   ];
 }
 
@@ -27,7 +40,6 @@ export const PLANNED_COMMANDS = [
   'archive',
   'bisect',
   'blame',
-  'cherry-pick',
   'clean',
   'clone',
   'config',
@@ -35,21 +47,15 @@ export const PLANNED_COMMANDS = [
   'fetch',
   'fsck',
   'gc',
-  'merge',
   'mv',
   'pull',
   'push',
-  'rebase',
   'reflog',
   'remote',
-  'reset',
   'restore',
-  'revert',
   'rm',
   'show',
-  'stash',
   'submodule',
   'switch',
-  'tag',
   'worktree',
 ] as const;

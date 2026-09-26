@@ -101,10 +101,10 @@ describe('GitEngine', () => {
   it('reports usage errors with exit code 129', () => {
     const session = createSession();
     session.run('git init');
-    const result = session.run('git commit --amend');
+    const result = session.run('git commit --fixup HEAD');
 
     expect(result.exitCode).toBe(129);
-    expect(result.output).toMatch(/^error: unknown option `amend'\nusage: git commit/);
+    expect(result.output).toMatch(/^error: unknown option `fixup'\nusage: git commit/);
     expect(result.explanation.key).toBe('error.usage');
   });
 
@@ -122,10 +122,10 @@ describe('GitEngine', () => {
     expect(session.run('git comit').output).toBe(
       "git: 'comit' is not a git command. See 'git --help'.\n\nThe most similar command is\n\tcommit",
     );
-    expect(session.run('git merge feature')).toMatchObject({
-      output: "agitz: 'git merge' is not available yet",
+    expect(session.run('git push origin main')).toMatchObject({
+      output: "agitz: 'git push' is not available yet",
       exitCode: 1,
-      explanation: { key: 'shell.notImplemented', params: { command: 'merge' } },
+      explanation: { key: 'shell.notImplemented', params: { command: 'push' } },
     });
   });
 
@@ -134,7 +134,7 @@ describe('GitEngine', () => {
     const help = session.run('git');
 
     expect(help.exitCode).toBe(1);
-    expect(help.output).toContain('   checkout   Switch branches or restore working tree files');
+    expect(help.output).toContain('   checkout      Switch branches or restore working tree files');
     expect(session.run('git --version').output).toBe('git version 2.46.0');
     expect(session.engine.availableCommands).toEqual([
       'init',
@@ -144,6 +144,13 @@ describe('GitEngine', () => {
       'log',
       'branch',
       'checkout',
+      'merge',
+      'rebase',
+      'cherry-pick',
+      'reset',
+      'revert',
+      'stash',
+      'tag',
     ]);
   });
 });

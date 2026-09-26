@@ -17,7 +17,7 @@ const GIT_COMMANDS_TAKING_REVISIONS = new Set([
   'merge',
   'rebase',
 ]);
-const GIT_COMMANDS_TAKING_PATHS = new Set(['add', 'checkout', 'rm', 'restore', 'diff']);
+const GIT_COMMANDS_TAKING_PATHS = new Set(['add', 'checkout', 'diff', 'reset', 'restore', 'rm']);
 const SHELL_COMMANDS_TAKING_PATHS = new Set(['ls', 'cat', 'touch', 'rm', 'echo']);
 
 function pathCandidates(workspace: Workspace, word: string): string[] {
@@ -49,7 +49,7 @@ export function completeCommandLine(
     pool = [...gitCommands];
   } else if (program === 'git' && subcommand !== undefined) {
     if (GIT_COMMANDS_TAKING_REVISIONS.has(subcommand) && workspace.repository) {
-      pool.push(...branchNames(workspace.repository));
+      pool.push(...branchNames(workspace.repository), ...Object.keys(workspace.repository.tags));
     }
     if (GIT_COMMANDS_TAKING_PATHS.has(subcommand)) {
       pool.push(...pathCandidates(workspace, word));

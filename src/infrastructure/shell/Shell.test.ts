@@ -114,4 +114,64 @@ describe('Shell', () => {
     expect(session.run('help').output).toMatch(/^Available commands:\n {2}git <command>/);
     expect(session.shell.commandNames).toContain('clear');
   });
+
+  it('runs a merge conflict scenario from command lines', () => {
+    const session = createSession();
+    for (const line of [
+      'git init',
+      'echo "title" > README.md',
+      'git add .',
+      'git commit -m "docs: add readme"',
+      'git checkout -b feature',
+      'echo "feature title" > README.md',
+      'git commit -am "docs: rename title on feature"',
+      'git checkout main',
+      'echo "main title" > README.md',
+      'git commit -am "docs: rename title on main"',
+    ]) {
+      session.run(line);
+    }
+
+    expect(session.run('git merge feature').exitCode).toBe(1);
+    expect(session.run('git status -s').output).toBe('UU README.md');
+    session.run('echo "main and feature title" > README.md');
+    session.run('git add README.md');
+    expect(session.run('git commit --no-edit').output).toMatch(
+      /^\[main [0-9a-f]{7}\] Merge branch 'feature'$/,
+    );
+    expect(session.run('git log --oneline -1').output).toMatch(
+      /\(HEAD -> main\) Merge branch 'feature'$/,
+    );
+  });
+
+  it('maps history commands and their options', () => {
+    const session = createSession();
+    for (const line of [
+      'git init',
+      'echo a > a.txt',
+      'git add .',
+      'git commit -m "feat: a"',
+      'echo b > b.txt',
+      'git add .',
+      'git commit -m "feat: b"',
+    ]) {
+      session.run(line);
+    }
+
+    expect(session.run('git tag -a v1.0.0 -m "First release"').exitCode).toBe(0);
+    expect(session.run('git tag').output).toBe('v1.0.0');
+    expect(session.run('git reset --hard HEAD~1').output).toMatch(
+      /^HEAD is now at [0-9a-f]{7} feat: a$/,
+    );
+    expect(session.run('git cherry-pick v1.0.0').exitCode).toBe(0);
+    expect(session.run('git revert HEAD --no-edit').output).toMatch(/Revert "feat: b"/);
+    session.run('echo wip > a.txt');
+    expect(session.run('git stash').output).toMatch(/^Saved working directory/);
+    expect(session.run('git stash list').output).toMatch(/^stash@\{0\}: WIP on main/);
+    expect(session.run('git stash pop').exitCode).toBe(0);
+    expect(session.run('git rebase -i HEAD~2').output).toBe(
+      'agitz: interactive rebase (git rebase -i) is not supported yet',
+    );
+    expect(session.run('git stash frobnicate').exitCode).toBe(129);
+  });
 });

@@ -52,12 +52,12 @@ describe('Terminal', () => {
     const user = userEvent.setup();
     const { input } = renderTerminal(['git init']);
 
-    await user.type(input, 'git sta{Tab}');
+    await user.type(input, 'git stat{Tab}');
     expect(input).toHaveValue('git status ');
 
     await user.clear(input);
     await user.type(input, 'git c{Tab}');
-    expect(screen.getByText(/Suggestions/)).toHaveTextContent('checkout commit');
+    expect(screen.getByText(/Suggestions/)).toHaveTextContent('checkout cherry-pick commit');
   });
 
   it('marks errors', async () => {
