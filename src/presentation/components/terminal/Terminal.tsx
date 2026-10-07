@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
+import { findDocIdForCommandLine } from '@/content/docs';
+
 import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useDocsStore } from '../../stores/docsStore';
+import { docTitle } from '../docs/docTitle';
 
 import { completeInput } from './completeInput';
 import { Prompt } from './Prompt';
+import { TerminalExplanation } from './TerminalExplanation';
 import { TerminalOutput } from './TerminalOutput';
 
 const FIRST_STEPS = ['git init', 'echo "# My project" > README.md', 'git status'];
 
 export function Terminal() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const workspace = useSession((state) => state.workspace);
   const entries = useSession((state) => state.entries);
   const commandHistory = useSession((state) => state.commandHistory);
@@ -18,6 +23,7 @@ export function Terminal() {
   const run = useSession((state) => state.run);
   const complete = useSession((state) => state.complete);
   const clear = useSession((state) => state.clear);
+  const openDocs = useDocsStore((state) => state.open);
 
   const [input, setInput] = useState('');
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
@@ -60,6 +66,12 @@ export function Terminal() {
       const completed = completeInput(input, complete(input));
       setInput(completed.input);
       setSuggestions(completed.suggestions);
+    } else if (event.key === 'F1') {
+      event.preventDefault();
+      openDocs(
+        findDocIdForCommandLine(input) ??
+          findDocIdForCommandLine(entries.at(-1)?.commandLine ?? ''),
+      );
     } else if (event.key === 'Escape') {
       setSuggestions([]);
       inputRef.current?.blur();
@@ -94,15 +106,44 @@ export function Terminal() {
             </pre>
           </div>
         )}
-        {entries.map((entry) => (
-          <div key={entry.id} className="mb-1">
-            <div className="flex flex-wrap">
-              <Prompt workspace={entry.workspaceBefore} />
-              <span className="break-all whitespace-pre-wrap">{entry.commandLine}</span>
+        {entries.map((entry, index) => {
+          const docId = findDocIdForCommandLine(entry.commandLine);
+          const isLatest = index === entries.length - 1;
+          return (
+            <div key={entry.id} className="group mb-1">
+              <div className="flex flex-wrap items-start">
+                <Prompt workspace={entry.workspaceBefore} />
+                <span className="break-all whitespace-pre-wrap">{entry.commandLine}</span>
+                {docId !== null && !isLatest && (
+                  // Kept out of the tab order so the log does not fill up with stops;
+                  // F1 and the documentation panel offer the same pages from the keyboard.
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      openDocs(docId);
+                    }}
+                    title={t('terminal.learnMoreAbout', { command: docTitle(docId, language) })}
+                    aria-label={t('terminal.learnMoreAbout', {
+                      command: docTitle(docId, language),
+                    })}
+                    className="text-terminal-accent ml-2 font-sans opacity-0 group-hover:opacity-100"
+                  >
+                    ⓘ
+                  </button>
+                )}
+              </div>
+              <TerminalOutput output={entry.output} />
+              {isLatest && (
+                <TerminalExplanation
+                  explanation={entry.explanation}
+                  docId={docId}
+                  onLearnMore={openDocs}
+                />
+              )}
             </div>
-            <TerminalOutput output={entry.output} />
-          </div>
-        ))}
+          );
+        })}
         {suggestions.length > 0 && (
           <p className="text-terminal-muted">
             {t('terminal.completions')} {suggestions.join('  ')}

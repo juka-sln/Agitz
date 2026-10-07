@@ -1,12 +1,36 @@
-export type Language = 'fr' | 'en';
+import type { Language } from '@/shared/language';
 
-export const LANGUAGES: readonly Language[] = ['fr', 'en'];
+export type { Language } from '@/shared/language';
 
 const fr = {
   'header.themeToLight': 'Passer au thème clair',
   'header.themeToDark': 'Passer au thème sombre',
   'header.languageSwitch': 'Switch to English',
   'header.languageShort': 'EN',
+
+  'header.docs': 'Documentation',
+
+  'docs.title': 'Documentation',
+  'docs.intro':
+    'Une fiche par commande et des guides de bonnes pratiques. Dans le terminal, F1 ouvre la fiche de la commande en cours.',
+  'docs.close': 'Fermer la documentation',
+  'docs.back': 'Page précédente',
+  'docs.home': 'Sommaire',
+  'docs.search': 'Rechercher une commande ou un guide',
+  'docs.noResults': 'Aucun résultat pour « {query} ».',
+  'docs.commands': 'Commandes',
+  'docs.guides': 'Bonnes pratiques',
+  'docs.guide': 'Guide',
+  'docs.category.basics': 'Les bases',
+  'docs.category.branches': 'Branches et historique',
+  'docs.category.undo': 'Annuler et mettre de côté',
+  'docs.category.shell': 'Terminal',
+  'docs.section.description': 'Ce qu’elle fait',
+  'docs.section.options': 'Syntaxe et options',
+  'docs.section.examples': 'Exemples',
+  'docs.section.underTheHood': 'Sous le capot',
+  'docs.section.pitfalls': 'Pièges courants',
+  'docs.related': 'Voir aussi',
 
   'files.title': 'Fichiers',
   'files.empty': 'Aucun fichier pour l’instant. Crée-en un depuis le terminal :',
@@ -44,7 +68,10 @@ const fr = {
     'Ce terminal simule un vrai shell avec Git. Tape help pour voir les commandes, ou commence par :',
   'terminal.completions': 'Suggestions :',
   'terminal.keyboardHelp':
-    'Entrée exécute la commande, flèches haut et bas pour l’historique, Tab complète une commande commencée, Échap quitte le terminal.',
+    'Entrée exécute la commande, flèches haut et bas pour l’historique, Tab complète une commande commencée, F1 ouvre la documentation de la commande, Échap quitte le terminal.',
+  'terminal.learnMore': 'En savoir plus',
+  'terminal.learnMoreAbout': 'En savoir plus sur {command}',
+  'terminal.learnMoreTarget': 'sur {command}',
 } as const;
 
 export type MessageKey = keyof typeof fr;
@@ -54,6 +81,30 @@ const en: Record<MessageKey, string> = {
   'header.themeToDark': 'Switch to dark theme',
   'header.languageSwitch': 'Passer en français',
   'header.languageShort': 'FR',
+
+  'header.docs': 'Documentation',
+
+  'docs.title': 'Documentation',
+  'docs.intro':
+    'One page per command, plus best practice guides. In the terminal, F1 opens the page of the command being typed.',
+  'docs.close': 'Close the documentation',
+  'docs.back': 'Previous page',
+  'docs.home': 'Contents',
+  'docs.search': 'Search a command or a guide',
+  'docs.noResults': 'No results for "{query}".',
+  'docs.commands': 'Commands',
+  'docs.guides': 'Best practices',
+  'docs.guide': 'Guide',
+  'docs.category.basics': 'Basics',
+  'docs.category.branches': 'Branches and history',
+  'docs.category.undo': 'Undo and set aside',
+  'docs.category.shell': 'Terminal',
+  'docs.section.description': 'What it does',
+  'docs.section.options': 'Syntax and options',
+  'docs.section.examples': 'Examples',
+  'docs.section.underTheHood': 'Under the hood',
+  'docs.section.pitfalls': 'Common pitfalls',
+  'docs.related': 'See also',
 
   'files.title': 'Files',
   'files.empty': 'No files yet. Create one from the terminal:',
@@ -91,7 +142,10 @@ const en: Record<MessageKey, string> = {
     'This terminal simulates a real shell with Git. Type help to list the commands, or start with:',
   'terminal.completions': 'Suggestions:',
   'terminal.keyboardHelp':
-    'Enter runs the command, up and down arrows browse history, Tab completes a started command, Escape leaves the terminal.',
+    'Enter runs the command, up and down arrows browse history, Tab completes a started command, F1 opens the documentation of the command, Escape leaves the terminal.',
+  'terminal.learnMore': 'Learn more',
+  'terminal.learnMoreAbout': 'Learn more about {command}',
+  'terminal.learnMoreTarget': 'about {command}',
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = { fr, en };
