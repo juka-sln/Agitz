@@ -207,6 +207,43 @@ export const en: Record<keyof typeof fr, ExplanationText> = {
   'error.tagNotFound': 'No tag is called `{name}`.',
   'error.emptyTagMessage':
     'An annotated tag needs a message: `git tag -a v1.0.0 -m "First release"`.',
+  'error.remoteAlreadyExists':
+    'A remote named `{name}` already exists. `git remote -v` shows its URL.',
+  'error.noSuchRemote': 'No remote is called `{name}`. `git remote` lists the existing ones.',
+  'error.invalidRemoteName': '`{name}` is not a valid remote name (no spaces, for instance).',
+  'error.notARemoteRepository':
+    '`{name}` is not a configured remote. Check with `git remote -v`, or add it with `git remote add {name} <url>`.',
+  'error.repositoryNotFound':
+    'No repository exists at `{url}`. Check the URL: in Agitz, the shared repository is https://github.com/alice/project.git.',
+  'error.cloneDestinationNotEmpty':
+    'This workstation already holds a project. To clone, switch to another user (or add one) whose workstation is empty.',
+  'error.remoteRefNotFound':
+    'The remote has no branch `{ref}`. `git branch -r` lists the ones you know.',
+  'error.noPushDestination':
+    'Git does not know where to send your commits: this repository has no remote. Add it with `git remote add origin <url>`.',
+  'error.noUpstreamBranch':
+    'The branch `{branch}` has no upstream branch yet. The first time, use `git push -u {remote} {branch}`: it is created on the remote and tracked from then on.',
+  'error.pushFromDetachedHead':
+    'On a detached HEAD there is no branch to push. Create a branch, or name the destination: `git push {remote} HEAD:<branch>`.',
+  'error.sourceRefspec':
+    'Nothing is called `{refspec}` in your repository: no branch or tag by that name. Did you make at least one commit on that branch?',
+  'error.noTrackingInformation':
+    'The branch `{branch}` tracks no remote branch: Git does not know what to fetch. Name it (`git pull origin main`) or set up tracking with `git branch -u origin/<branch>`.',
+  'error.pullFromDetachedHead':
+    'On a detached HEAD, `git pull` does not know which branch to update. Go back to a branch first.',
+  'error.pullBranchNotSpecified':
+    'Your branch does not track `{remote}`: name the remote branch too, for instance `git pull {remote} main`.',
+  'error.upstreamRefNotFetched':
+    'The branch `{branch}` you track no longer exists on the remote (it was probably deleted after a merge). `git branch --unset-upstream` removes the tracking.',
+  'error.upstreamBranchNotFound':
+    '`{name}` does not exist on your side yet. Run `git fetch` to get the remote branches, or publish yours with `git push -u`.',
+  'error.noUpstreamConfigured': 'The branch `{branch}` already tracks no remote branch.',
+  'error.noUpstreamForBranch':
+    '`@{u}` means the upstream branch, but `{branch}` has none. Set it with `git branch -u origin/<branch>`.',
+  'error.localUpstreamNotSupported':
+    'Agitz only supports tracking a remote branch, such as `origin/{name}`.',
+  'error.detachedHeadUpstream':
+    'On a detached HEAD there is no branch to attach `{upstream}` to. Switch to a branch first.',
   'error.usage': 'The command is malformed: the expected syntax is printed right above.',
   'error.commandLine': 'The options are not valid: read the message above.',
   'error.notSupported': 'This option exists in Git, but Agitz does not simulate it yet: {feature}.',

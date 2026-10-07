@@ -90,3 +90,19 @@ export function findMergeBase(repository: Repository, left: Hash, right: Hash): 
       .sort((a, b) => b.committedAt.epochSeconds - a.committedAt.epochSeconds)[0]?.hash ?? null
   );
 }
+
+/** How many commits each side has that the other lacks, as shown by `git status`. */
+export function countDivergence(
+  repository: Repository,
+  local: Hash,
+  upstream: Hash,
+): { readonly ahead: number; readonly behind: number } {
+  const localCommits = collectReachableCommits(repository, [local]);
+  const upstreamCommits = collectReachableCommits(repository, [upstream]);
+  const countMissing = (from: Set<Hash>, other: Set<Hash>) =>
+    [...from].filter((hash) => !other.has(hash)).length;
+  return {
+    ahead: countMissing(localCommits, upstreamCommits),
+    behind: countMissing(upstreamCommits, localCommits),
+  };
+}

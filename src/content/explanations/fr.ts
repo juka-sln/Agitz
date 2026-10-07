@@ -213,6 +213,43 @@ export const fr = {
   'error.tagNotFound': 'Aucun tag ne s’appelle `{name}`.',
   'error.emptyTagMessage':
     'Un tag annoté a besoin d’un message : `git tag -a v1.0.0 -m "First release"`.',
+  'error.remoteAlreadyExists': 'Un remote `{name}` existe déjà. `git remote -v` montre son URL.',
+  'error.noSuchRemote': 'Aucun remote ne s’appelle `{name}`. `git remote` liste ceux qui existent.',
+  'error.invalidRemoteName':
+    '`{name}` n’est pas un nom de remote valide (pas d’espace, par exemple).',
+  'error.notARemoteRepository':
+    '`{name}` n’est pas un remote configuré. Vérifie avec `git remote -v`, ou ajoute-le avec `git remote add {name} <url>`.',
+  'error.repositoryNotFound':
+    'Aucun dépôt n’existe à l’adresse `{url}`. Vérifie l’URL : dans Agitz, le dépôt partagé est https://github.com/alice/project.git.',
+  'error.cloneDestinationNotEmpty':
+    'Ce poste contient déjà un projet. Pour cloner, passe sur un autre utilisateur (ou ajoute-en un) dont le poste est vide.',
+  'error.remoteRefNotFound':
+    'Le dépôt distant n’a pas de branche `{ref}`. `git branch -r` liste celles que tu connais.',
+  'error.noPushDestination':
+    'Git ne sait pas où envoyer tes commits : ce dépôt n’a aucun remote. Ajoute-le avec `git remote add origin <url>`.',
+  'error.noUpstreamBranch':
+    'La branche `{branch}` n’a pas encore de branche amont. La première fois, utilise `git push -u {remote} {branch}` : elle sera créée sur le dépôt distant et suivie ensuite.',
+  'error.pushFromDetachedHead':
+    'En HEAD détaché, il n’y a pas de branche à pousser. Crée une branche, ou précise la destination : `git push {remote} HEAD:<branche>`.',
+  'error.sourceRefspec':
+    'Rien ne s’appelle `{refspec}` dans ton dépôt : pas de branche ni de tag de ce nom. As-tu fait au moins un commit sur cette branche ?',
+  'error.noTrackingInformation':
+    'La branche `{branch}` ne suit aucune branche distante : Git ne sait pas quoi récupérer. Précise-le (`git pull origin main`) ou configure le suivi avec `git branch -u origin/<branche>`.',
+  'error.pullFromDetachedHead':
+    'En HEAD détaché, `git pull` ne sait pas dans quelle branche intégrer. Retourne d’abord sur une branche.',
+  'error.pullBranchNotSpecified':
+    'Ta branche ne suit pas `{remote}` : précise aussi la branche distante, par exemple `git pull {remote} main`.',
+  'error.upstreamRefNotFetched':
+    'La branche `{branch}` que tu suis n’existe plus sur le dépôt distant (elle a sans doute été supprimée après une fusion). `git branch --unset-upstream` retire le suivi.',
+  'error.upstreamBranchNotFound':
+    '`{name}` n’existe pas encore chez toi. Fais `git fetch` pour récupérer les branches distantes, ou publie la tienne avec `git push -u`.',
+  'error.noUpstreamConfigured': 'La branche `{branch}` ne suit déjà aucune branche distante.',
+  'error.noUpstreamForBranch':
+    '`@{u}` désigne la branche amont, mais `{branch}` n’en a pas. Configure-la avec `git branch -u origin/<branche>`.',
+  'error.localUpstreamNotSupported':
+    'Agitz ne gère que le suivi d’une branche distante, comme `origin/{name}`.',
+  'error.detachedHeadUpstream':
+    'En HEAD détaché, il n’y a pas de branche à laquelle attacher `{upstream}`. Bascule d’abord sur une branche.',
   'error.usage': 'La commande est mal formée : la syntaxe attendue est affichée juste au-dessus.',
   'error.commandLine': 'Les options passées ne sont pas valides : relis le message au-dessus.',
   'error.notSupported':

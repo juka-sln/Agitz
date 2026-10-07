@@ -64,5 +64,8 @@ export function buildRepository(
     unmerged: {},
     operation: null,
     stash: [],
+    remotes: {},
+    remoteBranches: {},
+    upstreams: {},
   };
 }

@@ -4,6 +4,7 @@ import type { Hash } from '../value-objects/Hash';
 import type { Commit } from './Commit';
 import { attachedHead, type Head } from './Head';
 import type { PendingOperation } from './PendingOperation';
+import { remoteTrackingName, type Remote, type Upstream } from './Remote';
 import type { StashEntry } from './StashEntry';
 import type { Tag } from './Tag';
 import { EMPTY_TREE, type Tree } from './Tree';
@@ -24,6 +25,11 @@ export interface Repository {
   readonly operation: PendingOperation | null;
   /** Newest first: `stash@{0}` is the first entry. */
   readonly stash: readonly StashEntry[];
+  readonly remotes: Readonly<Record<string, Remote>>;
+  /** Remote-tracking branches such as `origin/main`: where each remote branch was at the last contact. */
+  readonly remoteBranches: Readonly<Record<string, Hash>>;
+  /** Local branch name mapped to the remote branch it tracks. */
+  readonly upstreams: Readonly<Record<string, Upstream>>;
 }
 
 export function createEmptyRepository(initialBranch: BranchName): Repository {
@@ -37,6 +43,9 @@ export function createEmptyRepository(initialBranch: BranchName): Repository {
     unmerged: {},
     operation: null,
     stash: [],
+    remotes: {},
+    remoteBranches: {},
+    upstreams: {},
   };
 }
 
@@ -116,4 +125,63 @@ export function hasUnmergedPaths(repository: Repository): boolean {
 
 export function findTag(repository: Repository, name: string): Tag | undefined {
   return Object.hasOwn(repository.tags, name) ? repository.tags[name] : undefined;
+}
+
+function withoutKey<T>(record: Readonly<Record<string, T>>, key: string): Record<string, T> {
+  return Object.fromEntries(Object.entries(record).filter(([name]) => name !== key));
+}
+
+export function findRemote(repository: Repository, name: string): Remote | undefined {
+  return Object.hasOwn(repository.remotes, name) ? repository.remotes[name] : undefined;
+}
+
+export function remoteNames(repository: Repository): string[] {
+  return Object.keys(repository.remotes).sort();
+}
+
+export function findRemoteBranch(repository: Repository, name: string): Hash | undefined {
+  return Object.hasOwn(repository.remoteBranches, name)
+    ? repository.remoteBranches[name]
+    : undefined;
+}
+
+/** Branch names (without the remote prefix) that `remote` had at the last contact. */
+export function remoteBranchesOf(repository: Repository, remote: string): BranchName[] {
+  const prefix = remoteTrackingName(remote, '');
+  return Object.keys(repository.remoteBranches)
+    .filter((name) => name.startsWith(prefix))
+    .map((name) => name.slice(prefix.length) as BranchName)
+    .sort();
+}
+
+export function setRemoteBranch(repository: Repository, name: string, hash: Hash): Repository {
+  return { ...repository, remoteBranches: { ...repository.remoteBranches, [name]: hash } };
+}
+
+export function deleteRemoteBranch(repository: Repository, name: string): Repository {
+  return { ...repository, remoteBranches: withoutKey(repository.remoteBranches, name) };
+}
+
+export function findUpstream(repository: Repository, branch: string): Upstream | undefined {
+  return Object.hasOwn(repository.upstreams, branch) ? repository.upstreams[branch] : undefined;
+}
+
+export function setUpstream(
+  repository: Repository,
+  branch: BranchName,
+  upstream: Upstream,
+): Repository {
+  return { ...repository, upstreams: { ...repository.upstreams, [branch]: upstream } };
+}
+
+export function unsetUpstream(repository: Repository, branch: string): Repository {
+  return { ...repository, upstreams: withoutKey(repository.upstreams, branch) };
+}
+
+export function setTag(repository: Repository, name: string, tag: Tag): Repository {
+  return { ...repository, tags: { ...repository.tags, [name]: tag } };
+}
+
+export function deleteTag(repository: Repository, name: string): Repository {
+  return { ...repository, tags: withoutKey(repository.tags, name) };
 }
