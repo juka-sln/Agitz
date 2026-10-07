@@ -1,11 +1,13 @@
 import type { Commit } from '@/domain/entities/Commit';
 import { attachedHead, detachedHead, type Head } from '@/domain/entities/Head';
+import { upstreamName, type Upstream } from '@/domain/entities/Remote';
 import {
   findBranch,
   getBlobContent,
   getCommit,
   getHeadCommitHash,
   setBranch,
+  setUpstream,
   type Repository,
 } from '@/domain/entities/Repository';
 import { requireRepository, type Workspace } from '@/domain/entities/Workspace';
@@ -33,6 +35,12 @@ import {
 import { describeCommit, pluralize } from './support/describeCommit';
 import { formatLocalChanges } from './support/formatStatus';
 import { hashTree } from './support/objects';
+import {
+  formatTrackingStatus,
+  formatUpstreamSetup,
+  remoteBranchCandidates,
+  upstreamForStartPoint,
+} from './support/remotes';
 
 export interface CheckoutInput {
   /** Arguments before `--`: a branch or commit to switch to, optionally followed by paths. */
@@ -53,6 +61,8 @@ interface SwitchMove {
   /** The revision as the user typed it, echoed in the detached HEAD advice. */
   readonly target: string;
   readonly kind: SwitchKind;
+  /** Set when the new branch starts tracking a remote branch. */
+  readonly upstream?: Upstream | null;
 }
 
 const ORPHAN_LIST_LIMIT = 4;
@@ -100,6 +110,10 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
         : this.showLocalChanges(workspace, repository);
     }
     if (tryResolveRevision(repository, first) === null) {
+      const [guess, ...others] = remoteBranchCandidates(repository, first);
+      if (guess !== undefined && others.length === 0 && rest.length === 0) {
+        return this.createBranchAndSwitch(workspace, repository, first, upstreamName(guess));
+      }
       return this.restorePaths(workspace, repository, undefined, input.targets);
     }
     return rest.length > 0
@@ -170,12 +184,15 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
       );
     }
 
-    return this.moveHead(workspace, repository, setBranch(repository, name, start), {
-      head: attachedHead(name),
-      commit: start,
-      target: name,
-      kind: 'newBranch',
-    });
+    const upstream =
+      startPoint === undefined ? null : upstreamForStartPoint(repository, startPoint);
+    const base = setBranch(repository, name, start);
+    return this.moveHead(
+      workspace,
+      repository,
+      upstream === null ? base : setUpstream(base, name, upstream),
+      { head: attachedHead(name), commit: start, target: name, kind: 'newBranch', upstream },
+    );
   }
 
   private ensureResolvedIndex(repository: Repository): void {
@@ -207,7 +224,11 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
     const lines = [
       ...(move.head.type === 'attached' ? formatLocalChanges(computeStatus(next, files)) : []),
       ...this.leavingDetachedHeadMessage(previous, move.commit, leftBehind),
+      ...(move.upstream ? [formatUpstreamSetup(move.target, move.upstream)] : []),
       ...this.switchMessage(previous, move),
+      ...(move.kind === 'branch' && move.head.type === 'attached'
+        ? formatTrackingStatus(next, move.head.branch)
+        : []),
     ];
 
     return succeed(
@@ -286,6 +307,13 @@ export class CheckoutCommand implements GitCommand<CheckoutInput> {
     const { head } = move;
     if (head.type === 'detached') {
       return explain('checkout.detached', params);
+    }
+    if (move.upstream) {
+      return explain('checkout.createdTrackingBranch', {
+        ...params,
+        branch: head.branch,
+        upstream: upstreamName(move.upstream),
+      });
     }
     if (move.kind === 'newBranch') {
       return explain('checkout.createdBranch', { ...params, branch: head.branch });

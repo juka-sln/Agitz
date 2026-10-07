@@ -6,6 +6,7 @@ import { compareByteOrder, parentDirectories } from '@/domain/value-objects/File
 import { shortHash, type Hash } from '@/domain/value-objects/Hash';
 
 import { describeCommit, pluralize } from './describeCommit';
+import { formatTrackingStatus } from './remotes';
 
 const LONG_LABELS: Record<FileChangeType, string> = {
   added: 'new file:',
@@ -151,9 +152,19 @@ function describeUnmerged(repository: Repository, status: WorkingTreeStatus): st
   ];
 }
 
+function describeTracking(repository: Repository): string[] {
+  const { head, operation } = repository;
+  if (head.type !== 'attached' || operation?.type === 'rebase') {
+    return [];
+  }
+  const tracking = formatTrackingStatus(repository, head.branch);
+  return tracking.length === 0 ? [] : [...tracking, ''];
+}
+
 export function formatLongStatus(repository: Repository, status: WorkingTreeStatus): string {
   const isUnborn = getHeadCommitHash(repository) === null;
-  const lines = [describeHead(repository), ...describeOperation(repository, status)];
+  const lines = [describeHead(repository), ...describeTracking(repository)];
+  lines.push(...describeOperation(repository, status));
 
   if (isUnborn) {
     lines.push('', 'No commits yet', '');

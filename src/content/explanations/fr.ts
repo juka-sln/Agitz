@@ -52,11 +52,22 @@ export const fr = {
     `${plural(count, 'La branche', 'Les branches')} ${String(names)} ${plural(count, 'est supprimée', 'sont supprimées')}. Seule l’étiquette disparaît : les commits restent tant qu’une autre référence y mène.`,
   'branch.renamed': 'La branche `{from}` s’appelle maintenant `{to}`. Ses commits n’ont pas bougé.',
 
+  'branch.listedRemote':
+    'Les branches `origin/…` sont des branches de suivi : la position des branches du dépôt distant lors du dernier contact (`fetch`, `pull` ou `push`). Elles ne bougent jamais quand tu commites.',
+  'branch.createdTracking':
+    'La branche `{name}` est créée sur `{commit}` et suit `{upstream}` : `git status` dira si tu es en avance ou en retard, et `git pull` / `git push` sauront où aller sans arguments.',
+  'branch.upstreamSet':
+    '`{name}` suit maintenant `{upstream}`. C’est sa branche amont (upstream) : la référence de `git status`, `git pull` et `git push`.',
+  'branch.upstreamUnset':
+    '`{name}` ne suit plus aucune branche distante. `git pull` et `git push` demanderont désormais où aller.',
+
   'checkout.switchedBranch': ({ branch, leftBehind }) =>
     `Tu es maintenant sur \`${String(branch)}\` : HEAD pointe sur cette branche et les fichiers du dossier ont été remplacés par ceux de son dernier commit.${Number(leftBehind) > 0 ? ` Attention : ${String(leftBehind)} commit(s) créé(s) en HEAD détaché ne sont plus sur aucune branche.` : ''}`,
   'checkout.alreadyOn': 'Tu es déjà sur `{branch}` : rien ne change.',
   'checkout.createdBranch':
     'Raccourci de `git branch` + `git checkout` : la branche `{branch}` est créée et tu es déjà dessus. Tes prochains commits la feront avancer.',
+  'checkout.createdTrackingBranch':
+    'Il n’existait pas de branche locale `{branch}`, mais `{upstream}` existe : Git en a créé une copie locale qui la suit, et tu es dessus. Tu peux y travailler puis `git push`.',
   'checkout.detached': ({ commit, leftBehind }) =>
     `HEAD est détaché sur \`${String(commit)}\` : tu regardes ce commit sans être sur une branche. Tu peux explorer librement ; pour garder un travail fait ici, crée une branche.${Number(leftBehind) > 0 ? ` ${String(leftBehind)} commit(s) laissé(s) derrière ne sont plus sur aucune branche.` : ''}`,
   'checkout.nothingToDo':

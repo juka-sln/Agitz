@@ -27,7 +27,7 @@ describe('BranchCommand', () => {
       const hash = shortHash(bench.headCommit.hash);
       bench.run(branch, { action: 'create', name: 'feature' });
 
-      expect(bench.run(branch, { action: 'list', verbose: true }).output).toBe(
+      expect(bench.run(branch, { action: 'list', verbosity: 1 }).output).toBe(
         `  feature ${hash} feat: add a\n* main    ${hash} feat: add a`,
       );
     });
