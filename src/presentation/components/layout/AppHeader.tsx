@@ -1,5 +1,7 @@
 import { useTranslation } from '../../hooks/useTranslation';
+import { useDocsStore } from '../../stores/docsStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
+import { DOCS_PANEL_ID } from '../docs/DocsPanel';
 
 /** Two transit lines forking at a station: the branch in its simplest form. */
 function LogoMark() {
@@ -58,6 +60,20 @@ function ThemeIcon({ theme }: { theme: 'light' | 'dark' }) {
   );
 }
 
+function BookIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const buttonClass =
   'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';
 
@@ -66,6 +82,8 @@ export function AppHeader() {
   const theme = usePreferencesStore((state) => state.theme);
   const toggleTheme = usePreferencesStore((state) => state.toggleTheme);
   const toggleLanguage = usePreferencesStore((state) => state.toggleLanguage);
+  const isDocsOpen = useDocsStore((state) => state.isOpen);
+  const toggleDocs = useDocsStore((state) => state.toggle);
 
   return (
     <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-4">
@@ -74,6 +92,16 @@ export function AppHeader() {
         <h1 className="text-ink text-lg font-bold tracking-tight">Agitz</h1>
       </div>
       <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className={`${buttonClass} gap-1.5`}
+          onClick={toggleDocs}
+          aria-expanded={isDocsOpen}
+          aria-controls={isDocsOpen ? DOCS_PANEL_ID : undefined}
+        >
+          <BookIcon />
+          <span className="sr-only sm:not-sr-only">{t('header.docs')}</span>
+        </button>
         <button
           type="button"
           className={buttonClass}
