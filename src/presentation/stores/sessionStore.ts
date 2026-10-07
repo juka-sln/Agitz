@@ -1,5 +1,6 @@
 import { createStore } from 'zustand/vanilla';
 
+import type { Explanation } from '@/application/git-commands/GitCommand';
 import type { CommandResult } from '@/application/git-commands/runGitCommand';
 import type { Workspace } from '@/domain/entities/Workspace';
 import type { Completion } from '@/infrastructure/shell/completion';
@@ -12,6 +13,7 @@ export interface TerminalEntry {
   readonly commandLine: string;
   readonly output: string;
   readonly exitCode: number;
+  readonly explanation: Explanation;
 }
 
 export interface SessionState {
@@ -53,6 +55,7 @@ export function createSessionStore(shell: Shell, initialWorkspace: Workspace) {
         commandLine: trimmed,
         output: result.output,
         exitCode: result.exitCode,
+        explanation: result.explanation,
       };
       nextId += 1;
 
