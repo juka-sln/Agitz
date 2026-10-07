@@ -1,6 +1,6 @@
-export type Language = 'fr' | 'en';
+import type { Language } from '@/shared/language';
 
-export const LANGUAGES: readonly Language[] = ['fr', 'en'];
+export type { Language } from '@/shared/language';
 
 const fr = {
   'header.themeToLight': 'Passer au thème clair',
