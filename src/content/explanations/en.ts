@@ -1,6 +1,12 @@
 import type { fr } from './fr';
 import { plural, type ExplanationText } from './types';
 
+/** Added when `git push -u` just set the upstream of the pushed branch. */
+const upstreamNote = (upstream: string | number | undefined) =>
+  upstream === '' || upstream === undefined
+    ? ''
+    : ` Your branch now tracks \`${String(upstream)}\`: next time, plain \`git push\` and \`git pull\` are enough.`;
+
 export const en: Record<keyof typeof fr, ExplanationText> = {
   'init.created':
     'A hidden `.git` folder was just created: that folder is the repository and will hold the whole history. You are on the branch `{branch}`, empty until the first commit.',
@@ -114,6 +120,69 @@ export const en: Record<keyof typeof fr, ExplanationText> = {
   'tag.createdAnnotated':
     'Annotated tag `{name}` placed on `{commit}`, with an author, a date and a message. This is the recommended format for published releases.',
   'tag.deleted': 'Tag(s) {names} deleted. The commits do not move.',
+
+  'clone.cloned':
+    'The repository `{url}` is copied to your workstation: the whole history ({count} commit(s)), a remote named `origin` pointing to it, remote-tracking branches `origin/…`, and your local branch `{branch}` tracking `{tracking}`.',
+  'clone.empty':
+    'The repository `{url}` is still empty: you get a local repository linked to `origin`, without any commit. Make your first commit, then `git push` to fill the remote repository.',
+
+  'remote.none':
+    'No remote: this repository does not know any other copy yet. Add one with `git remote add origin <url>`.',
+  'remote.listed': ({ count }) =>
+    `${String(count)} ${plural(count, 'remote', 'remotes')} configured. A remote is just a nickname for a URL: by convention \`origin\` is the repository you cloned from.`,
+  'remote.added':
+    'The remote `{name}` now points to `{url}`. Nothing was exchanged yet: `git fetch {name}` downloads its content, `git push -u {name} <branch>` publishes yours.',
+  'remote.removed':
+    'The remote `{name}` is forgotten, together with its remote-tracking branches. The remote repository itself is untouched.',
+  'remote.renamed':
+    'The remote `{from}` is now called `{to}`; its remote-tracking branches were renamed too.',
+  'remote.urlChanged': 'The remote `{name}` now points to `{url}`.',
+
+  'fetch.noRemote': 'No remote is configured: there is nothing to fetch.',
+  'fetch.upToDate':
+    'Nothing new on `{remote}`: your remote-tracking branches are already up to date.',
+  'fetch.updated': ({ remote, count }) =>
+    `${String(count)} ${plural(count, 'reference', 'references')} updated from \`${String(remote)}\`. Only the remote-tracking branches (\`${String(remote)}/…\`) moved: your branches and files are untouched. \`git status\` now tells whether you are behind, and \`git merge\` or \`git pull\` brings these commits in.`,
+
+  'pull.upToDate': 'Your branch already contains everything on `{target}`: nothing to integrate.',
+  'pull.fastForward':
+    '`git pull` = `git fetch` + `git merge`. You had not committed anything: your branch simply moved up to `{target}` (fast-forward) and your files are up to date.',
+  'pull.merged':
+    'You and the remote both had new commits: `git pull` joined them in the merge commit `{commit}`. Remember to `git push` to share it.',
+  'pull.mergeConflicts':
+    'The remote commits and yours change the same lines: the merge stops on a conflict. Fix the files, `git add`, then `git commit` (or `git merge --abort`).',
+  'pull.rebased':
+    'With `--rebase`, your local commits were replayed on top of `{target}`: the history stays linear, without a merge commit. They have new hashes; you can now `git push`.',
+  'pull.rebaseConflicts':
+    'Replaying your commits on top of `{target}` hits a conflict. Fix it, `git add`, then `git rebase --continue` (or `git rebase --abort`).',
+  'pull.divergent':
+    'Your branch and `{target}` each have commits the other lacks. Git does not choose for you: run again with `git pull --no-rebase` (merge), `git pull --rebase` (replay your commits) or `git pull --ff-only` (refuse). The remote commits are already downloaded.',
+  'pull.started':
+    'Your branch had no commit yet: it starts right on `{target}` (`{commit}`) and your files were filled in.',
+
+  'push.created': (p) =>
+    `The branch \`${String(p.branch)}\` is published on \`${String(p.remote)}\`: the remote repository received your commits and the branch was created there.${upstreamNote(p.upstream)}`,
+  'push.updated': (p) =>
+    `The remote repository received your new commits: \`${String(p.branch)}\` moved forward there (fast-forward), and so did \`${String(p.remote)}/${String(p.branch)}\` on your side.${upstreamNote(p.upstream)}`,
+  'push.forced':
+    'Forced push: the `{branch}` branch of the remote was replaced by yours. Commits only it contained are lost for everyone. Keep it for your own branches, preferably with `--force-with-lease`.',
+  'push.deleted':
+    'The branch `{branch}` is deleted from the remote (and `{remote}/{branch}` from your repository). Your local branch, if any, is untouched.',
+  'push.tags':
+    'Your tags are published on `{remote}`: others will get them on their next `git fetch`.',
+  'push.upToDate': 'The remote already has all these commits: nothing to send.',
+  'push.upstreamSet': (p) =>
+    `Nothing to send, the remote is already up to date.${upstreamNote(p.upstream)}`,
+  'push.rejectedFetchFirst':
+    'Rejected: someone pushed commits to `{branch}` that you do not have. Git refuses to overwrite their work. Run `git pull` to integrate them, then push again.',
+  'push.rejectedNonFastForward':
+    'Rejected: your branch is behind `{remote}/{branch}` or diverged from it (after a rebase or an amend, for instance). Integrate the remote commits first with `git pull`. If you rewrote your own history, `--force-with-lease` is the safe option.',
+  'push.rejectedStale':
+    'Rejected by `--force-with-lease`: `{branch}` moved on the remote since your last `fetch`. Someone pushed in the meantime; get their work before forcing.',
+  'push.rejectedTag':
+    'Rejected: the tag already exists on the remote with another commit. A published tag should never move.',
+  'push.deleteMissing':
+    'This branch does not exist on `{remote}`: there is nothing to delete. `git branch -r` shows the known remote branches.',
 
   'shell.help': 'These are the commands of the simulated terminal. Git commands start with `git`.',
   'shell.gitUsage': 'The Git commands available in Agitz.',

@@ -26,9 +26,14 @@ export function createTestContext(): GitCommandContext {
 
 /** Holds a workspace across successive commands, like a terminal session. */
 export class GitTestBench {
-  readonly context: GitCommandContext = createTestContext();
+  readonly context: GitCommandContext;
 
-  workspace: Workspace = createWorkspace(WORKSPACE_PATH, ALICE);
+  workspace: Workspace;
+
+  constructor(context = createTestContext(), identity = ALICE, path = WORKSPACE_PATH) {
+    this.context = context;
+    this.workspace = createWorkspace(path, identity);
+  }
 
   get repository(): Repository {
     return requireRepository(this.workspace);

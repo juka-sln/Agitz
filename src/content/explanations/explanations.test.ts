@@ -22,6 +22,11 @@ const NAMESPACES = [
   'reset',
   'stash',
   'tag',
+  'clone',
+  'remote',
+  'fetch',
+  'pull',
+  'push',
   'shell',
 ];
 
@@ -30,12 +35,17 @@ const SEQUENCER_KEYS = ['cherry-pick', 'revert', 'rebase'].flatMap((kind) =>
   ['done', 'conflicts', 'aborted'].map((outcome) => `${kind}.${outcome}`),
 );
 
+/** Configuration names quoted inside real Git messages, which look like keys but are not. */
+const GIT_CONFIG_NAMES = new Set(['push.autoSetupRemote']);
+
 function emittedKeys(): Set<string> {
   const keys = new Set(SEQUENCER_KEYS);
   const literal = new RegExp(`'((?:${NAMESPACES.join('|')})\\.[a-zA-Z]+)'`, 'g');
   for (const source of Object.values(SOURCES)) {
-    for (const [, key] of source.matchAll(literal)) {
-      keys.add(key ?? '');
+    for (const [, key = ''] of source.matchAll(literal)) {
+      if (!GIT_CONFIG_NAMES.has(key)) {
+        keys.add(key);
+      }
     }
     for (const [, code] of source.matchAll(/readonly code = '(\w+)'/g)) {
       keys.add(`error.${code ?? ''}`);

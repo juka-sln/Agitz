@@ -1,5 +1,11 @@
 import { plural, type ExplanationText } from './types';
 
+/** Added when `git push -u` just set the upstream of the pushed branch. */
+const upstreamNote = (upstream: string | number | undefined) =>
+  upstream === '' || upstream === undefined
+    ? ''
+    : ` Ta branche suit désormais \`${String(upstream)}\` : la prochaine fois, \`git push\` et \`git pull\` suffiront.`;
+
 export const fr = {
   'init.created':
     'Un dossier caché `.git` vient d’être créé : c’est lui, le dépôt. Il contiendra tout l’historique. Tu es sur la branche `{branch}`, encore vide jusqu’au premier commit.',
@@ -114,6 +120,68 @@ export const fr = {
   'tag.createdAnnotated':
     'Tag annoté `{name}` posé sur `{commit}`, avec un auteur, une date et un message. C’est le format recommandé pour les versions publiées.',
   'tag.deleted': 'Tag(s) {names} supprimé(s). Les commits, eux, ne bougent pas.',
+
+  'clone.cloned':
+    'Le dépôt `{url}` est copié sur ton poste : tout l’historique ({count} commit(s)), un remote `origin` qui pointe vers lui, des branches de suivi `origin/…`, et ta branche locale `{branch}` qui suit `{tracking}`.',
+  'clone.empty':
+    'Le dépôt `{url}` est encore vide : tu as un dépôt local relié à `origin`, sans aucun commit. Fais ton premier commit puis `git push` pour remplir le dépôt distant.',
+
+  'remote.none':
+    'Aucun remote : ce dépôt ne connaît pas encore d’autre copie. Ajoute-en un avec `git remote add origin <url>`.',
+  'remote.listed': ({ count }) =>
+    `${String(count)} ${plural(count, 'remote configuré', 'remotes configurés')}. Un remote n’est qu’un surnom pour une URL : \`origin\` désigne par convention le dépôt d’où l’on a cloné.`,
+  'remote.added':
+    'Le remote `{name}` pointe maintenant vers `{url}`. Rien n’a encore été échangé : `git fetch {name}` récupère son contenu, `git push -u {name} <branche>` y publie le tien.',
+  'remote.removed':
+    'Le remote `{name}` est oublié, avec ses branches de suivi. Le dépôt distant, lui, n’est pas touché.',
+  'remote.renamed':
+    'Le remote `{from}` s’appelle maintenant `{to}` ; ses branches de suivi ont été renommées aussi.',
+  'remote.urlChanged': 'Le remote `{name}` pointe désormais vers `{url}`.',
+
+  'fetch.noRemote': 'Aucun remote n’est configuré : il n’y a rien à récupérer.',
+  'fetch.upToDate': 'Rien de nouveau sur `{remote}` : tes branches de suivi sont déjà à jour.',
+  'fetch.updated': ({ remote, count }) =>
+    `${String(count)} ${plural(count, 'référence mise à jour', 'références mises à jour')} depuis \`${String(remote)}\`. Seules les branches de suivi (\`${String(remote)}/…\`) ont bougé : tes branches et tes fichiers sont intacts. \`git status\` te dit maintenant si tu es en retard, et \`git merge\` ou \`git pull\` intègre ces commits.`,
+
+  'pull.upToDate': 'Ta branche contient déjà tout ce qu’il y a sur `{target}` : rien à intégrer.',
+  'pull.fastForward':
+    '`git pull` = `git fetch` + `git merge`. Tu n’avais rien fait de ton côté : ta branche a simplement avancé jusqu’à `{target}` (fast-forward) et tes fichiers sont à jour.',
+  'pull.merged':
+    'Toi et le dépôt distant aviez chacun de nouveaux commits : `git pull` les a réunis dans le commit de fusion `{commit}`. Pense à `git push` pour le partager.',
+  'pull.mergeConflicts':
+    'Les commits distants et les tiens modifient les mêmes lignes : la fusion s’arrête sur un conflit. Corrige les fichiers, `git add`, puis `git commit` (ou `git merge --abort`).',
+  'pull.rebased':
+    'Avec `--rebase`, tes commits locaux ont été rejoués au-dessus de `{target}` : l’historique reste linéaire, sans commit de fusion. Ils ont de nouveaux hash ; tu peux maintenant `git push`.',
+  'pull.rebaseConflicts':
+    'En rejouant tes commits au-dessus de `{target}`, un conflit apparaît. Corrige, `git add`, puis `git rebase --continue` (ou `git rebase --abort`).',
+  'pull.divergent':
+    'Ta branche et `{target}` ont chacune des commits que l’autre n’a pas. Git ne choisit pas à ta place : relance avec `git pull --no-rebase` (fusion), `git pull --rebase` (rejouer tes commits) ou `git pull --ff-only` (refuser). Les commits distants sont déjà téléchargés.',
+  'pull.started':
+    'Ta branche n’avait encore aucun commit : elle démarre directement sur `{target}` (`{commit}`) et tes fichiers ont été remplis.',
+
+  'push.created': (p) =>
+    `La branche \`${String(p.branch)}\` est publiée sur \`${String(p.remote)}\` : le dépôt distant a reçu tes commits et la branche y a été créée.${upstreamNote(p.upstream)}`,
+  'push.updated': (p) =>
+    `Le dépôt distant a reçu tes nouveaux commits : \`${String(p.branch)}\` y a avancé (fast-forward), et \`${String(p.remote)}/${String(p.branch)}\` aussi chez toi.${upstreamNote(p.upstream)}`,
+  'push.forced':
+    'Push forcé : la branche `{branch}` du dépôt distant a été remplacée par la tienne. Les commits qu’elle seule contenait sont perdus pour tout le monde. À réserver à tes propres branches, de préférence avec `--force-with-lease`.',
+  'push.deleted':
+    'La branche `{branch}` est supprimée du dépôt distant (et `{remote}/{branch}` de ton dépôt). Ta branche locale, si elle existe, est intacte.',
+  'push.tags':
+    'Tes tags sont publiés sur `{remote}` : les autres les récupèreront au prochain `git fetch`.',
+  'push.upToDate': 'Le dépôt distant a déjà tous ces commits : rien à envoyer.',
+  'push.upstreamSet': (p) =>
+    `Rien à envoyer, le dépôt distant est déjà à jour.${upstreamNote(p.upstream)}`,
+  'push.rejectedFetchFirst':
+    'Refusé : quelqu’un a poussé sur `{branch}` des commits que tu n’as pas. Git refuse d’écraser leur travail. Fais `git pull` pour les intégrer, puis repousse.',
+  'push.rejectedNonFastForward':
+    'Refusé : ta branche est en retard sur `{remote}/{branch}` ou a divergé (par exemple après un rebase ou un amend). Intègre d’abord les commits distants avec `git pull`. Si tu as réécrit ton propre historique, `--force-with-lease` est l’option sûre.',
+  'push.rejectedStale':
+    'Refusé par `--force-with-lease` : `{branch}` a bougé sur le dépôt distant depuis ton dernier `fetch`. Quelqu’un a poussé entre-temps ; récupère son travail avant de forcer.',
+  'push.rejectedTag':
+    'Refusé : le tag existe déjà sur le dépôt distant avec un autre commit. Un tag publié ne doit pas bouger.',
+  'push.deleteMissing':
+    'Cette branche n’existe pas sur `{remote}` : il n’y a rien à supprimer. `git branch -r` montre les branches distantes connues.',
 
   'shell.help': 'Voici les commandes du terminal simulé. Les commandes Git commencent par `git`.',
   'shell.gitUsage': 'Liste des commandes Git disponibles dans Agitz.',

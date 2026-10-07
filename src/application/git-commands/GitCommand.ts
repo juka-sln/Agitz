@@ -1,3 +1,4 @@
+import type { Network } from '@/domain/entities/Network';
 import type { Workspace } from '@/domain/entities/Workspace';
 
 import type { Clock } from '../ports/Clock';
@@ -21,6 +22,8 @@ export interface CommandOutcome {
   readonly output: string;
   readonly exitCode: number;
   readonly explanation: Explanation;
+  /** The hosted repositories after the command, set only by commands that talk to a remote. */
+  readonly network?: Network | undefined;
 }
 
 export interface GitCommand<TInput> {
