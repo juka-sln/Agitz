@@ -26,10 +26,14 @@ function TagIcon() {
 
 function StationNodeView({ data }: NodeProps<StationNodeType>) {
   const { t } = useTranslation();
-  const { commit, lineToken, headState, currentBranch, branchTokens } = data;
+  const { commit, lineToken, headState, currentBranch, branchTokens, remoteBranchTokens } = data;
   const isHead = headState !== null;
   const isMerge = commit.parents.length > 1;
-  const hasLabels = isHead || commit.branches.length > 0 || commit.tags.length > 0;
+  const hasLabels =
+    isHead ||
+    commit.branches.length > 0 ||
+    commit.remoteBranches.length > 0 ||
+    commit.tags.length > 0;
 
   return (
     <div
@@ -95,6 +99,16 @@ function StationNodeView({ data }: NodeProps<StationNodeType>) {
               }}
             >
               {branch}
+            </span>
+          ))}
+          {commit.remoteBranches.map((name) => (
+            <span
+              key={name}
+              title={t('graph.remoteBranch')}
+              className="bg-surface text-ink rounded-full border-2 border-dashed px-2 py-0.5 text-xs font-semibold whitespace-nowrap"
+              style={{ borderColor: `var(--${remoteBranchTokens[name] ?? 'line-none'})` }}
+            >
+              {name}
             </span>
           ))}
           {commit.tags.map((tag) => (

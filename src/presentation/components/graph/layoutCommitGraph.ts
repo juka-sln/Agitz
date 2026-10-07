@@ -22,6 +22,8 @@ export interface StationData extends Record<string, unknown> {
   readonly currentBranch: string | null;
   /** Line token of each branch whose tip is this commit. */
   readonly branchTokens: Readonly<Record<string, string>>;
+  /** Line token of each remote-tracking branch here: its own lane, else its local branch's. */
+  readonly remoteBranchTokens: Readonly<Record<string, string>>;
 }
 
 export interface TransitEdgeData extends Record<string, unknown> {
@@ -76,6 +78,13 @@ export function layoutCommitGraph(graph: CommitGraph): {
           branch,
           laneToken(graph.lanes.includes(branch) ? branch : null, graph.lanes),
         ]),
+      ),
+      remoteBranchTokens: Object.fromEntries(
+        commit.remoteBranches.map((name) => {
+          const local = name.slice(name.indexOf('/') + 1);
+          const lane = [name, local].find((candidate) => graph.lanes.includes(candidate));
+          return [name, laneToken(lane ?? null, graph.lanes)];
+        }),
       ),
     },
   }));

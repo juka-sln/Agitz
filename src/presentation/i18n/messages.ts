@@ -54,6 +54,8 @@ const fr = {
   'graph.unreachable': 'Aucune branche ne mène plus à ce commit',
   'graph.mergeCommit': 'Commit de fusion : il réunit deux historiques',
   'graph.tag': 'Tag : un nom fixe posé sur ce commit',
+  'graph.remoteBranch':
+    'Branche de suivi : où était cette branche sur le dépôt distant lors du dernier fetch, pull ou push',
   'graph.summary': 'Commits : {count}, du plus récent au plus ancien. HEAD : {head}.',
   'graph.summaryDetached': 'détaché sur {commit}',
   'graph.controls': 'Contrôles du graphe',
@@ -129,6 +131,8 @@ const en: Record<MessageKey, string> = {
   'graph.unreachable': 'No branch leads to this commit anymore',
   'graph.mergeCommit': 'Merge commit: it joins two histories',
   'graph.tag': 'Tag: a fixed name on this commit',
+  'graph.remoteBranch':
+    'Remote-tracking branch: where this branch was on the remote at the last fetch, pull or push',
   'graph.summary': 'Commits: {count}, newest first. HEAD: {head}.',
   'graph.summaryDetached': 'detached at {commit}',
   'graph.controls': 'Graph controls',

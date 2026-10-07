@@ -23,6 +23,8 @@ export interface GraphCommit {
   readonly lane: string | null;
   /** Branches whose tip is this commit. */
   readonly branches: readonly string[];
+  /** Remote-tracking branches (`origin/main`) whose last known tip is this commit. */
+  readonly remoteBranches: readonly string[];
   readonly tags: readonly string[];
   readonly isHead: boolean;
   /** False for commits no branch or HEAD can reach anymore (e.g. left behind in detached HEAD). */
@@ -58,6 +60,12 @@ function assignLanes(repository: Repository): Map<Hash, string> {
   if (repository.head.type === 'detached') {
     tips.push([DETACHED_LANE, repository.head.commit]);
   }
+  // Commits only a remote-tracking branch knows (fetched, not merged yet) get their own lane.
+  tips.push(
+    ...Object.entries(repository.remoteBranches).sort(([left], [right]) =>
+      left.localeCompare(right),
+    ),
+  );
 
   for (const [lane, tip] of tips) {
     let hash: Hash | undefined = tip;
@@ -75,6 +83,7 @@ export function getCommitGraph(repository: Repository): CommitGraph {
   const headCommit = getHeadCommitHash(repository);
   const reachable = collectReachableCommits(repository, [
     ...Object.values(repository.branches),
+    ...Object.values(repository.remoteBranches),
     ...Object.values(repository.tags).map((tag) => tag.target),
     ...(headCommit === null ? [] : [headCommit]),
   ]);
@@ -86,6 +95,13 @@ export function getCommitGraph(repository: Repository): CommitGraph {
     if (tip !== undefined) {
       tipsByCommit.set(tip, [...(tipsByCommit.get(tip) ?? []), name]);
     }
+  }
+
+  const remoteTipsByCommit = new Map<Hash, string[]>();
+  for (const [name, tip] of Object.entries(repository.remoteBranches).sort(([left], [right]) =>
+    left.localeCompare(right),
+  )) {
+    remoteTipsByCommit.set(tip, [...(remoteTipsByCommit.get(tip) ?? []), name]);
   }
 
   const tagsByCommit = new Map<Hash, string[]>();
@@ -104,6 +120,7 @@ export function getCommitGraph(repository: Repository): CommitGraph {
     column,
     lane: lanes.get(commit.hash) ?? null,
     branches: tipsByCommit.get(commit.hash) ?? [],
+    remoteBranches: remoteTipsByCommit.get(commit.hash) ?? [],
     tags: tagsByCommit.get(commit.hash) ?? [],
     isHead: commit.hash === headCommit,
     isReachable: reachable.has(commit.hash),
@@ -115,17 +132,22 @@ export function getCommitGraph(repository: Repository): CommitGraph {
       firstColumnOfLane.set(commit.lane, commit.column);
     }
   }
-  const laneOrder = [...firstColumnOfLane.keys()].sort((left, right) => {
-    const leftPriority = PRIORITY_BRANCHES.indexOf(left);
-    const rightPriority = PRIORITY_BRANCHES.indexOf(right);
-    if (leftPriority !== -1 || rightPriority !== -1) {
-      return (
-        (leftPriority === -1 ? Infinity : leftPriority) -
-        (rightPriority === -1 ? Infinity : rightPriority)
-      );
-    }
-    return (firstColumnOfLane.get(left) ?? 0) - (firstColumnOfLane.get(right) ?? 0);
-  });
+  // A remote-tracking lane (`origin/main`) sits right below the local branch it mirrors.
+  const localName = (lane: string) =>
+    Object.hasOwn(repository.remoteBranches, lane) ? lane.slice(lane.indexOf('/') + 1) : lane;
+  const priorityOf = (lane: string) => {
+    const index = PRIORITY_BRANCHES.indexOf(localName(lane));
+    return index === -1 ? Infinity : index;
+  };
+  const columnOf = (lane: string) =>
+    firstColumnOfLane.get(localName(lane)) ?? firstColumnOfLane.get(lane) ?? 0;
+  const laneOrder = [...firstColumnOfLane.keys()].sort(
+    (left, right) =>
+      priorityOf(left) - priorityOf(right) ||
+      columnOf(left) - columnOf(right) ||
+      Number(localName(left) !== left) - Number(localName(right) !== right) ||
+      left.localeCompare(right),
+  );
 
   return { commits, lanes: laneOrder, head: repository.head, headCommit };
 }

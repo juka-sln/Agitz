@@ -1,7 +1,10 @@
 import { BranchCommand } from '@/application/git-commands/BranchCommand';
 import { CheckoutCommand } from '@/application/git-commands/CheckoutCommand';
+import { FetchCommand } from '@/application/git-commands/FetchCommand';
+import { PushCommand } from '@/application/git-commands/PushCommand';
 import { TagCommand } from '@/application/git-commands/TagCommand';
 import { GitTestBench } from '@/test/fixtures/GitTestBench';
+import { TeamBench } from '@/test/fixtures/TeamBench';
 
 import { DETACHED_LANE, getCommitGraph } from './getCommitGraph';
 
@@ -82,5 +85,24 @@ describe('getCommitGraph', () => {
       tags: ['v0.1.0'],
       isReachable: true,
     });
+  });
+
+  it('shows remote-tracking branches and the commits only they know', () => {
+    const team = new TeamBench().share();
+    team.bob.commit('feat: from bob', { 'bob.txt': 'bob' });
+    team.online(team.bob, new PushCommand(), {});
+    team.alice.commit('feat: from alice', { 'alice.txt': 'alice' });
+    team.online(team.alice, new FetchCommand(), {});
+    const graph = getCommitGraph(team.alice.repository);
+
+    expect(
+      graph.commits.map((commit) => [commit.subject, commit.lane, commit.remoteBranches]),
+    ).toEqual([
+      ['feat: initial commit', 'main', []],
+      ['feat: from bob', 'origin/main', ['origin/main']],
+      ['feat: from alice', 'main', []],
+    ]);
+    expect(graph.lanes).toEqual(['main', 'origin/main']);
+    expect(graph.commits.every((commit) => commit.isReachable)).toBe(true);
   });
 });
