@@ -5,7 +5,8 @@ interface RichTextProps {
   readonly codeClassName?: string;
 }
 
-const DEFAULT_CODE_CLASS = 'rounded bg-surface-raised px-1 py-px font-mono text-[0.9em] text-ink';
+const DEFAULT_CODE_CLASS =
+  'whitespace-nowrap rounded bg-surface-raised px-1 py-px font-mono text-[0.9em] text-ink';
 
 export function RichText({ text, codeClassName = DEFAULT_CODE_CLASS }: RichTextProps) {
   return (
