@@ -10,6 +10,13 @@ import { createInitCliCommand } from './initCliCommand';
 import { createLogCliCommand } from './logCliCommand';
 import { createMergeCliCommand } from './mergeCliCommand';
 import { createRebaseCliCommand } from './rebaseCliCommand';
+import {
+  createCloneCliCommand,
+  createFetchCliCommand,
+  createPullCliCommand,
+  createPushCliCommand,
+  createRemoteCliCommand,
+} from './remoteCliCommands';
 import { createResetCliCommand } from './resetCliCommand';
 import { createCherryPickCliCommand, createRevertCliCommand } from './sequenceCliCommands';
 import { createStashCliCommand } from './stashCliCommand';
@@ -32,6 +39,11 @@ export function createCliCommands(context: GitCommandContext): CliCommand[] {
     createRevertCliCommand(context),
     createStashCliCommand(context),
     createTagCliCommand(context),
+    createCloneCliCommand(),
+    createRemoteCliCommand(),
+    createFetchCliCommand(),
+    createPullCliCommand(context),
+    createPushCliCommand(),
   ];
 }
 
@@ -41,17 +53,12 @@ export const PLANNED_COMMANDS = [
   'bisect',
   'blame',
   'clean',
-  'clone',
   'config',
   'diff',
-  'fetch',
   'fsck',
   'gc',
   'mv',
-  'pull',
-  'push',
   'reflog',
-  'remote',
   'restore',
   'rm',
   'show',

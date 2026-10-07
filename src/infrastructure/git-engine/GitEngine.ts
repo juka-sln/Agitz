@@ -5,6 +5,7 @@ import {
   unchangedResult,
   type CommandResult,
 } from '@/application/git-commands/runGitCommand';
+import { EMPTY_NETWORK, type Network } from '@/domain/entities/Network';
 import type { Workspace } from '@/domain/entities/Workspace';
 
 import type { CliCommand } from './cli/CliCommand';
@@ -21,9 +22,9 @@ export const GIT_VERSION = '2.46.0';
 export interface GitEngine {
   /** Names of the Git commands the engine can run, for help and autocompletion. */
   readonly availableCommands: readonly string[];
-  execute(commandLine: string, workspace: Workspace): CommandResult;
+  execute(commandLine: string, workspace: Workspace, network?: Network): CommandResult;
   /** Runs `git <args>` from already tokenized arguments (without the leading `git`). */
-  executeArguments(args: readonly string[], workspace: Workspace): CommandResult;
+  executeArguments(args: readonly string[], workspace: Workspace, network?: Network): CommandResult;
 }
 
 function formatHelp(commands: readonly CliCommand[]): string {
@@ -56,7 +57,11 @@ export function createGitEngine(
   const commandsByName = new Map(commands.map((command) => [command.name, command]));
   const plannedCommands = new Set<string>(PLANNED_COMMANDS);
 
-  function executeGit(args: readonly string[], workspace: Workspace): CommandResult {
+  function executeGit(
+    args: readonly string[],
+    workspace: Workspace,
+    network: Network = EMPTY_NETWORK,
+  ): CommandResult {
     const [name, ...rest] = args;
 
     if (name === undefined) {
@@ -90,14 +95,18 @@ export function createGitEngine(
 
     const commandArgs = name === 'log' ? expandNumericLogShorthand(rest) : rest;
     return runGitCommand(workspace, (current) =>
-      command.execute(parseArguments(commandArgs, command.options, command.usage), current),
+      command.execute(
+        parseArguments(commandArgs, command.options, command.usage),
+        current,
+        network,
+      ),
     );
   }
 
   return {
     availableCommands: [...commandsByName.keys()],
     executeArguments: executeGit,
-    execute(commandLine, workspace) {
+    execute(commandLine, workspace, network) {
       let tokens: string[];
       try {
         tokens = tokenize(commandLine);
@@ -125,7 +134,7 @@ export function createGitEngine(
           explain('shell.commandNotFound', { command: program }),
         );
       }
-      return executeGit(args, workspace);
+      return executeGit(args, workspace, network);
     },
   };
 }

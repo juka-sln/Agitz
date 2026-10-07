@@ -4,6 +4,7 @@ import {
   unchangedResult,
   type CommandResult,
 } from '@/application/git-commands/runGitCommand';
+import type { Network } from '@/domain/entities/Network';
 import type { Workspace } from '@/domain/entities/Workspace';
 
 import { ShellSyntaxError, tokenizeShell, type ShellToken } from '../git-engine/cli/tokenize';
@@ -15,7 +16,8 @@ import { completeCommandLine, type Completion } from './completion';
 export interface Shell {
   /** Every command name the shell understands, `git` included. */
   readonly commandNames: readonly string[];
-  execute(commandLine: string, workspace: Workspace): CommandResult;
+  /** `network` holds the hosted repositories that `git clone`, `fetch`, `pull` and `push` reach. */
+  execute(commandLine: string, workspace: Workspace, network?: Network): CommandResult;
   complete(commandLine: string, workspace: Workspace): Completion;
 }
 
@@ -80,7 +82,7 @@ export function createShell(gitEngine: GitEngine = createGitEngine()): Shell {
   return {
     commandNames: ['git', ...shellCommands],
 
-    execute(commandLine, workspace) {
+    execute(commandLine, workspace, network) {
       let tokens: ShellToken[];
       try {
         tokens = tokenizeShell(commandLine);
@@ -116,7 +118,7 @@ export function createShell(gitEngine: GitEngine = createGitEngine()): Shell {
         );
       }
       if (program === 'git') {
-        return gitEngine.executeArguments(args, workspace);
+        return gitEngine.executeArguments(args, workspace, network);
       }
       if (!builtin) {
         return unchangedResult(

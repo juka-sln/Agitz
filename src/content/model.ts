@@ -6,7 +6,7 @@ import type { Localized } from '@/shared/language';
  */
 export type RichText = string;
 
-export type CommandCategory = 'basics' | 'branches' | 'undo' | 'shell';
+export type CommandCategory = 'basics' | 'branches' | 'undo' | 'remote' | 'shell';
 
 export interface CommandOption {
   readonly syntax: string;
