@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
-import { findDocIdForCommandLine } from '@/content/docs';
+import { findDocIdForCommandLine, docTitle } from '@/content/catalog';
 import { hasUnmergedPaths } from '@/domain/entities/Repository';
 
 import { useFirstSteps } from '../../hooks/useFirstSteps';
@@ -9,7 +9,6 @@ import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
-import { docTitle } from '../docs/docTitle';
 
 import { completeInput } from './completeInput';
 import { Prompt } from './Prompt';

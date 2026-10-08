@@ -1,8 +1,8 @@
 import type { Explanation } from '@/application/git-commands/GitCommand';
+import { docTitle } from '@/content/catalog';
 
 import { useExplanation } from '../../hooks/useExplanation';
 import { useTranslation } from '../../hooks/useTranslation';
-import { docTitle } from '../docs/docTitle';
 import { RichText } from '../docs/RichText';
 
 interface TerminalExplanationProps {

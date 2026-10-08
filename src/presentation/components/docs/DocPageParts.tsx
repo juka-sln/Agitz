@@ -1,10 +1,9 @@
 import type { ReactNode, RefObject } from 'react';
 
+import { docTitle } from '@/content/catalog';
 import { findDoc } from '@/content/docs';
 
 import { useTranslation } from '../../hooks/useTranslation';
-
-import { docTitle } from './docTitle';
 
 interface PageHeadingProps {
   readonly headingRef: RefObject<HTMLHeadingElement>;
