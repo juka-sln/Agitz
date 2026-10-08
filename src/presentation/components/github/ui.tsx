@@ -11,7 +11,8 @@ type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'quiet';
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-(--line-1) text-(--line-1-ink) hover:brightness-110',
   secondary: 'border border-rule bg-surface text-ink hover:bg-surface-raised',
-  danger: 'border border-rule bg-surface text-status-deleted hover:bg-surface-raised',
+  // Red text loses contrast on the raised background: hovering only outlines the button.
+  danger: 'border border-rule bg-surface text-status-deleted hover:border-status-deleted',
   quiet: 'text-ink-muted hover:bg-surface-raised hover:text-ink',
 };
 

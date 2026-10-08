@@ -23,7 +23,7 @@ export function FileDiffView({ file }: { readonly file: FileDiff }) {
         <span className="text-status-deleted font-mono">−{file.deletions}</span>
         <span className="sr-only">{t(`github.fileChange.${file.type}`)}</span>
       </p>
-      <pre className="overflow-x-auto py-1 font-mono text-xs leading-5">
+      <pre className="py-1 font-mono text-xs leading-5 break-all whitespace-pre-wrap">
         {file.lines.map((line, index) => (
           // Lines never move within a rendered diff, so their position is a stable key.
           <div key={index} className={`px-3 ${LINE_STYLES[line.type].className}`}>

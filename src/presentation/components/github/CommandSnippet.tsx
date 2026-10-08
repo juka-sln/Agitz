@@ -15,9 +15,7 @@ export function CommandSnippet({ command }: { readonly command: string }) {
 
   return (
     <div className="bg-terminal text-terminal-ink flex items-center gap-2 rounded-md py-1 pr-1 pl-3">
-      <code className="min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap">
-        {command}
-      </code>
+      <code className="min-w-0 flex-1 font-mono text-xs break-all">{command}</code>
       <button
         type="button"
         onClick={copy}
