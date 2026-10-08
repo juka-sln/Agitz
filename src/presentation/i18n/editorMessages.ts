@@ -3,6 +3,11 @@ export const EDITOR_FR = {
   'header.editor': 'Éditeur',
   'header.conflicts': 'Fichiers en conflit : {count}',
 
+  'files.newFile': 'Nouveau fichier',
+  'files.newFilePath': 'Chemin du nouveau fichier',
+  'files.create': 'Créer',
+  'files.openInEditor': 'Ouvrir {path} dans l’éditeur',
+
   'terminal.resolveConflicts': 'Résoudre dans l’éditeur',
 
   'editor.title': 'Éditeur',
@@ -84,6 +89,11 @@ export const EDITOR_FR = {
 export const EDITOR_EN: Record<keyof typeof EDITOR_FR, string> = {
   'header.editor': 'Editor',
   'header.conflicts': 'Files in conflict: {count}',
+
+  'files.newFile': 'New file',
+  'files.newFilePath': 'Path of the new file',
+  'files.create': 'Create',
+  'files.openInEditor': 'Open {path} in the editor',
 
   'terminal.resolveConflicts': 'Resolve in the editor',
 

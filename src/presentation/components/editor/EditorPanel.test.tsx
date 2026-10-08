@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { createTestSessionStore } from '@/test/fixtures/createTestSessionStore';
@@ -6,6 +6,7 @@ import { createTestSessionStore } from '@/test/fixtures/createTestSessionStore';
 import { useEditorStore } from '../../stores/editorStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
 import { SessionProvider } from '../../stores/SessionProvider';
+import { FileExplorer } from '../files/FileExplorer';
 import { AppHeader } from '../layout/AppHeader';
 
 import { EditorPanel } from './EditorPanel';
@@ -15,6 +16,7 @@ function renderEditor(commands: readonly string[] = []) {
   render(
     <SessionProvider store={store}>
       <AppHeader />
+      <FileExplorer />
       <EditorPanel />
     </SessionProvider>,
   );
@@ -99,13 +101,11 @@ describe('EditorPanel', () => {
     expect(store.getState().entries).toHaveLength(1);
   });
 
-  it('edits a file and saves it with Ctrl+S', async () => {
+  it('edits a file opened from the explorer and saves it with Ctrl+S', async () => {
     const user = userEvent.setup();
     const store = renderEditor(['echo "hello" > notes.txt']);
 
-    act(() => {
-      useEditorStore.getState().open('notes.txt');
-    });
+    await user.click(screen.getByRole('button', { name: 'Ouvrir notes.txt dans l’éditeur' }));
     const textarea = within(panel()).getByRole('textbox', { name: 'Contenu de notes.txt' });
     await user.type(textarea, 'world');
     expect(within(panel()).getByText('non enregistré')).toBeInTheDocument();
@@ -116,15 +116,34 @@ describe('EditorPanel', () => {
   });
 
   it('follows a command rewriting the file while it is open', async () => {
+    const user = userEvent.setup();
     const store = renderEditor(['echo "v1" > notes.txt']);
-    act(() => {
-      useEditorStore.getState().open('notes.txt');
-    });
+    await user.click(screen.getByRole('button', { name: 'Ouvrir notes.txt dans l’éditeur' }));
 
     store.getState().run('echo "v2" > notes.txt');
 
     expect(
       await within(panel()).findByRole('textbox', { name: 'Contenu de notes.txt' }),
     ).toHaveValue('v2\n');
+  });
+
+  it('creates a file from the explorer', async () => {
+    const user = userEvent.setup();
+    const store = renderEditor();
+
+    await user.click(screen.getByRole('button', { name: 'Nouveau fichier' }));
+    await user.type(screen.getByRole('textbox', { name: 'Chemin du nouveau fichier' }), '../x');
+    await user.click(screen.getByRole('button', { name: 'Créer' }));
+    expect(screen.getByText(/sort du projet/)).toBeInTheDocument();
+
+    await user.clear(screen.getByRole('textbox', { name: 'Chemin du nouveau fichier' }));
+    await user.type(
+      screen.getByRole('textbox', { name: 'Chemin du nouveau fichier' }),
+      'docs/notes.md',
+    );
+    await user.click(screen.getByRole('button', { name: 'Créer' }));
+
+    expect(store.getState().workspace.files).toEqual({ 'docs/notes.md': '' });
+    expect(within(panel()).getByRole('heading', { level: 2, name: 'docs/notes.md' })).toHaveFocus();
   });
 });

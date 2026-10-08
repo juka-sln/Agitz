@@ -1,7 +1,11 @@
+import { useState } from 'react';
+
 import { useTranslation } from '../../hooks/useTranslation';
 import { useWorkingTreeEntries } from '../../hooks/useWorkspaceViews';
+import { useEditorStore } from '../../stores/editorStore';
 
 import { buildFileTree } from './buildFileTree';
+import { NewFileForm } from './NewFileForm';
 import { isGoneFromDisk, statusBadges, type BadgeTone } from './statusBadges';
 
 const BADGE_CLASSES: Record<BadgeTone, string> = {
@@ -36,10 +40,45 @@ export function FileExplorer() {
   const { t } = useTranslation();
   const { entries, isRepository } = useWorkingTreeEntries();
   const rows = buildFileTree(entries);
+  const openEditor = useEditorStore((state) => state.open);
+  const editedPath = useEditorStore((state) => (state.isOpen ? state.path : null));
+  const [isCreating, setIsCreating] = useState(false);
 
   return (
     <nav aria-label={t('files.title')} className="flex min-h-40 flex-1 flex-col">
-      <h2 className="text-ink px-4 pt-4 pb-2 text-sm font-bold">{t('files.title')}</h2>
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+        <h2 className="text-ink text-sm font-bold">{t('files.title')}</h2>
+        <button
+          type="button"
+          onClick={() => {
+            setIsCreating((value) => !value);
+          }}
+          aria-expanded={isCreating}
+          title={t('files.newFile')}
+          className="text-ink-muted hover:bg-surface-raised hover:text-ink inline-flex size-7 items-center justify-center rounded-md"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M8 3v10M3 8h10"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="sr-only">{t('files.newFile')}</span>
+        </button>
+      </div>
+      {isCreating && (
+        <NewFileForm
+          onCreated={(path) => {
+            setIsCreating(false);
+            openEditor(path);
+          }}
+          onCancel={() => {
+            setIsCreating(false);
+          }}
+        />
+      )}
       {entries.length === 0 ? (
         <div className="text-ink-muted px-4 text-sm">
           <p>{t('files.empty')}</p>
@@ -62,11 +101,17 @@ export function FileExplorer() {
                 </>
               ) : (
                 <>
-                  <span
-                    className={`min-w-0 flex-1 truncate ${isGoneFromDisk(row.entry) ? 'text-ink-muted line-through' : 'text-ink'}`}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openEditor(row.entry.path);
+                    }}
+                    aria-label={t('files.openInEditor', { path: row.entry.path })}
+                    aria-current={editedPath === row.entry.path ? 'page' : undefined}
+                    className={`min-w-0 flex-1 truncate text-left underline-offset-2 hover:underline ${isGoneFromDisk(row.entry) ? 'text-ink-muted line-through' : 'text-ink'} ${editedPath === row.entry.path ? 'font-semibold' : ''}`}
                   >
                     {row.name}
-                  </span>
+                  </button>
                   {statusBadges(row.entry).map((badge) => (
                     <abbr
                       key={`${badge.tone}-${badge.letter}`}
