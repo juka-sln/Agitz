@@ -1,9 +1,6 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 
-import { DocsPanel } from './components/docs/DocsPanel';
-import { EditorPanel } from './components/editor/EditorPanel';
 import { FileExplorer } from './components/files/FileExplorer';
-import { GitHubPanel } from './components/github/GitHubPanel';
 import { CommitGraphView } from './components/graph/CommitGraphView';
 import { AppHeader } from './components/layout/AppHeader';
 import { HostedRepositories } from './components/team/HostedRepositories';
@@ -16,6 +13,30 @@ import { useGitHubStore } from './stores/githubStore';
 import { usePreferencesStore } from './stores/preferencesStore';
 import { SessionProvider } from './stores/SessionProvider';
 import type { SessionStore } from './stores/sessionStore';
+
+// The side panels hold most of the code and all the documentation: they load on first opening.
+const DocsPanel = lazy(async () => ({
+  default: (await import('./components/docs/DocsPanel')).DocsPanel,
+}));
+const GitHubPanel = lazy(async () => ({
+  default: (await import('./components/github/GitHubPanel')).GitHubPanel,
+}));
+const EditorPanel = lazy(async () => ({
+  default: (await import('./components/editor/EditorPanel')).EditorPanel,
+}));
+
+function SidePanels() {
+  const isDocsOpen = useDocsStore((state) => state.isOpen);
+  const isGitHubOpen = useGitHubStore((state) => state.isOpen);
+  const isEditorOpen = useEditorStore((state) => state.isOpen);
+  return (
+    <Suspense fallback={null}>
+      {isDocsOpen && <DocsPanel />}
+      {isGitHubOpen && <GitHubPanel />}
+      {isEditorOpen && <EditorPanel />}
+    </Suspense>
+  );
+}
 
 function useDocumentPreferences() {
   const theme = usePreferencesStore((state) => state.theme);
@@ -83,9 +104,7 @@ export function App({ store }: { store: SessionStore }) {
             <section className="border-rule min-h-0 border-t">
               <Terminal />
             </section>
-            <DocsPanel />
-            <GitHubPanel />
-            <EditorPanel />
+            <SidePanels />
           </main>
         </div>
       </div>

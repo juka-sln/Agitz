@@ -6,13 +6,12 @@ import { useGitHub } from '../../hooks/useGitHub';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
 import { useGitHubStore } from '../../stores/githubStore';
+import { GITHUB_PANEL_ID } from '../layout/panelIds';
 import { Avatar } from '../team/Avatar';
 
 import { RepositoryList } from './RepositoryList';
 import { RepositoryPage } from './RepositoryPage';
 import { useAvatarToken } from './useAvatarToken';
-
-export const GITHUB_PANEL_ID = 'github-panel';
 
 const toolbarButtonClass =
   'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';

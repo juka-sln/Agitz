@@ -2,6 +2,7 @@ import { createGitEngine } from '@/infrastructure/git-engine/GitEngine';
 import { createShell } from '@/infrastructure/shell/Shell';
 import { LANGUAGES } from '@/shared/language';
 
+import { DOC_CATALOG } from './catalog';
 import {
   ALL_DOCS,
   COMMAND_DOCS,
@@ -148,6 +149,18 @@ describe('documentation catalog', () => {
       }
     },
   );
+});
+
+describe('DOC_CATALOG', () => {
+  it('lists every page with its real title and category, in order', () => {
+    const fromPages = ALL_DOCS.map((doc) =>
+      doc.kind === 'command'
+        ? { kind: doc.kind, id: doc.id, title: doc.title, category: doc.category }
+        : { kind: doc.kind, id: doc.id, title: { fr: doc.text.fr.title, en: doc.text.en.title } },
+    );
+
+    expect(DOC_CATALOG).toEqual(fromPages);
+  });
 });
 
 describe('findDocIdForCommandLine', () => {
