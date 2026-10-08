@@ -1,6 +1,7 @@
-import type { PullRequest } from '@/domain/entities/PullRequest';
+import type { BranchLocation, PullRequest } from '@/domain/entities/PullRequest';
 
 import type { GitCommandContext } from '../git-commands/GitCommand';
+import { previewPullRequest, type PullRequestPreview } from '../queries/getGitHubViews';
 
 import { ClosePullRequest } from './ClosePullRequest';
 import { CreateIssue } from './CreateIssue';
@@ -32,6 +33,12 @@ export function createGitHubActions(context: GitCommandContext) {
     updateIssue: new UpdateIssue(),
     pullRequestStatus: (state: HostingState, pullRequest: PullRequest): PullRequestStatus =>
       getPullRequestStatus(context.hasher, state, pullRequest),
+    previewPullRequest: (
+      state: HostingState,
+      baseUrl: string,
+      base: string,
+      head: BranchLocation,
+    ): PullRequestPreview | null => previewPullRequest(context.hasher, state, baseUrl, base, head),
   } as const;
 }
 
