@@ -64,6 +64,16 @@ const fr = {
   'graph.fitView': 'Afficher tout le graphe',
   'graph.minimap': 'Vue d’ensemble du graphe',
 
+  'team.title': 'Équipe',
+  'team.add': 'Ajouter',
+  'team.newUserLabel': 'Prénom du coéquipier',
+  'team.active': 'poste actif',
+  'team.noRepository': 'aucun dépôt',
+  'team.error.empty': 'Donne un prénom à ton coéquipier.',
+  'team.error.tooLong': '{max} caractères au maximum.',
+  'team.error.invalid': 'Le prénom doit commencer par une lettre.',
+  'team.error.taken': 'Ce coéquipier existe déjà.',
+
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Commande',
   'terminal.welcome.title': 'Bienvenue dans Agitz.',
@@ -140,6 +150,16 @@ const en: Record<MessageKey, string> = {
   'graph.zoomOut': 'Zoom out',
   'graph.fitView': 'Show the whole graph',
   'graph.minimap': 'Graph overview',
+
+  'team.title': 'Team',
+  'team.add': 'Add',
+  'team.newUserLabel': 'Teammate’s first name',
+  'team.active': 'active workstation',
+  'team.noRepository': 'no repository',
+  'team.error.empty': 'Give your teammate a name.',
+  'team.error.tooLong': '{max} characters at most.',
+  'team.error.invalid': 'The name must start with a letter.',
+  'team.error.taken': 'This teammate already exists.',
 
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Command',

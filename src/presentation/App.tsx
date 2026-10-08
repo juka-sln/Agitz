@@ -4,6 +4,7 @@ import { DocsPanel } from './components/docs/DocsPanel';
 import { FileExplorer } from './components/files/FileExplorer';
 import { CommitGraphView } from './components/graph/CommitGraphView';
 import { AppHeader } from './components/layout/AppHeader';
+import { UserSwitcher } from './components/team/UserSwitcher';
 import { Terminal } from './components/terminal/Terminal';
 import { usePreferencesStore } from './stores/preferencesStore';
 import { SessionProvider } from './stores/SessionProvider';
@@ -26,7 +27,8 @@ export function App({ store }: { store: SessionStore }) {
       <div className="bg-canvas text-ink grid h-full grid-rows-[auto_1fr]">
         <AppHeader />
         <div className="grid min-h-0 grid-cols-1 md:grid-cols-[15rem_1fr]">
-          <aside className="border-rule bg-surface order-last max-h-56 min-h-0 border-t md:order-first md:max-h-none md:border-t-0 md:border-r">
+          <aside className="border-rule bg-surface order-last flex max-h-72 min-h-0 flex-col overflow-y-auto border-t md:order-first md:max-h-none md:border-t-0 md:border-r">
+            <UserSwitcher />
             <FileExplorer />
           </aside>
           <main className="relative grid min-h-0 grid-rows-[minmax(16rem,1fr)_minmax(14rem,40%)]">
