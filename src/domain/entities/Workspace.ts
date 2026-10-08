@@ -1,6 +1,6 @@
 import { NotAGitRepositoryError } from '../errors/RepositoryErrors';
 import { InvalidPathError } from '../errors/WorkingTreeErrors';
-import { normalizePath } from '../value-objects/FilePath';
+import { normalizePath, parentDirectories } from '../value-objects/FilePath';
 import type { Identity } from '../value-objects/Identity';
 
 import type { Repository } from './Repository';
@@ -49,4 +49,24 @@ export function deletePath(workspace: Workspace, rawPath: string): Workspace {
     ),
   );
   return { ...workspace, files };
+}
+
+export type FileWriteProblem = 'invalidPath' | 'isDirectory' | 'parentIsFile';
+
+/** Why a file cannot be written at this path, or `null` when it can. */
+export function findFileWriteProblem(
+  workspace: Workspace,
+  rawPath: string,
+): FileWriteProblem | null {
+  const path = normalizePath(rawPath);
+  if (path === null || path === '') {
+    return 'invalidPath';
+  }
+  const paths = Object.keys(workspace.files);
+  if (paths.some((filePath) => filePath.startsWith(`${path}/`))) {
+    return 'isDirectory';
+  }
+  return parentDirectories(path).some((parent) => Object.hasOwn(workspace.files, parent))
+    ? 'parentIsFile'
+    : null;
 }

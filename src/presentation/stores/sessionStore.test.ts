@@ -125,4 +125,23 @@ describe('sessionStore', () => {
       ]);
     });
   });
+
+  describe('as a text editor', () => {
+    it('saves files on the active workstation', () => {
+      const store = createTestSessionStore(['git init']);
+
+      expect(store.getState().saveFile('docs/notes.md', 'hello\n')).toBeNull();
+      expect(store.getState().workspace.files).toEqual({ 'docs/notes.md': 'hello\n' });
+    });
+
+    it('refuses paths that cannot hold a file', () => {
+      const store = createTestSessionStore(['echo hi > docs/notes.md']);
+      const { saveFile } = store.getState();
+
+      expect(saveFile('../outside.txt', '')).toBe('invalidPath');
+      expect(saveFile('docs', '')).toBe('isDirectory');
+      expect(saveFile('docs/notes.md/more.txt', '')).toBe('parentIsFile');
+      expect(store.getState().workspace.files).toEqual({ 'docs/notes.md': 'hi\n' });
+    });
+  });
 });

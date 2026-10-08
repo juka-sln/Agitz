@@ -19,7 +19,13 @@ import {
   type SimulatedUser,
   type UserNameProblem,
 } from '@/domain/entities/SimulatedUser';
-import { createWorkspace, type Workspace } from '@/domain/entities/Workspace';
+import {
+  createWorkspace,
+  findFileWriteProblem,
+  writeFile,
+  type FileWriteProblem,
+  type Workspace,
+} from '@/domain/entities/Workspace';
 import type { Completion } from '@/infrastructure/shell/completion';
 import type { Shell } from '@/infrastructure/shell/Shell';
 
@@ -65,6 +71,8 @@ export interface SessionState {
   readonly run: (commandLine: string) => void;
   readonly complete: (commandLine: string) => Completion;
   readonly clear: () => void;
+  /** Writes a file on the active workstation, like a text editor would. */
+  readonly saveFile: (path: string, content: string) => FileWriteProblem | null;
   readonly switchUser: (userId: string) => void;
   /** Creates a teammate with an empty workstation, or tells why the name is refused. */
   readonly addUser: (name: string) => UserNameProblem | null;
@@ -108,16 +116,19 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
     throw new Error('A session needs at least one user');
   }
   let nextId = 1;
-
-  return createStore<SessionState>()((set, get) => ({
+  const initialState = () => ({
     users: team.users,
     network: team.network,
     github: team.github,
-    gitHubActions,
     otherWorkstations: Object.fromEntries(
       otherUsers.map((user) => [user.id, createWorkstation(user)]),
     ),
     ...flatten(createWorkstation(firstUser)),
+  });
+
+  return createStore<SessionState>()((set, get) => ({
+    ...initialState(),
+    gitHubActions,
 
     run(commandLine) {
       const trimmed = commandLine.trim();
@@ -163,6 +174,15 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
 
     clear() {
       set({ entries: [], showWelcome: false });
+    },
+
+    saveFile(path, content) {
+      const { workspace } = get();
+      const problem = findFileWriteProblem(workspace, path);
+      if (problem === null) {
+        set({ workspace: writeFile(workspace, path, content) });
+      }
+      return problem;
     },
 
     switchUser(userId) {
