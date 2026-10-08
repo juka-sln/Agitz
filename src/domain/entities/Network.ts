@@ -1,12 +1,14 @@
 import { DEFAULT_INITIAL_BRANCH, createEmptyRepository, type Repository } from './Repository';
 
 /**
- * Repositories reachable over the (simulated) network, by canonical URL: the bare
- * repositories hosted on the virtual GitHub that workstations clone, fetch from and push to.
+ * What a workstation reaches over the (simulated) network: the bare repositories hosted on
+ * the virtual GitHub, by canonical URL.
  */
-export type Network = Readonly<Record<string, Repository>>;
+export interface Network {
+  readonly repositories: Readonly<Record<string, Repository>>;
+}
 
-export const EMPTY_NETWORK: Network = {};
+export const EMPTY_NETWORK: Network = { repositories: {} };
 
 /** GitHub answers to `…/project`, `…/project.git` and `…/project.git/` alike. */
 export function canonicalRepositoryUrl(url: string): string {
@@ -24,9 +26,13 @@ export function repositoryDirectoryName(url: string): string {
   return displayRepositoryUrl(url).split(/[/:]/).at(-1) ?? '';
 }
 
+export function hostedRepositoryUrls(network: Network): string[] {
+  return Object.keys(network.repositories).sort();
+}
+
 export function findHostedRepository(network: Network, url: string): Repository | undefined {
   const key = canonicalRepositoryUrl(url);
-  return Object.hasOwn(network, key) ? network[key] : undefined;
+  return Object.hasOwn(network.repositories, key) ? network.repositories[key] : undefined;
 }
 
 export function storeHostedRepository(
@@ -34,7 +40,10 @@ export function storeHostedRepository(
   url: string,
   repository: Repository,
 ): Network {
-  return { ...network, [canonicalRepositoryUrl(url)]: repository };
+  return {
+    ...network,
+    repositories: { ...network.repositories, [canonicalRepositoryUrl(url)]: repository },
+  };
 }
 
 /** A new, empty repository on the server, like the one GitHub creates from its web form. */
