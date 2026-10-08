@@ -25,6 +25,7 @@ import { githubCollaborationGuide } from './guides/githubCollaboration';
 import { githubPlatformGuide } from './guides/githubPlatform';
 import { gitignoreGuide } from './guides/gitignore';
 import { mergeVsRebaseGuide } from './guides/mergeVsRebase';
+import { resolvingConflictsGuide } from './guides/resolvingConflicts';
 import { semverGuide } from './guides/semver';
 import type { CommandCategory, CommandDoc, Doc, GuideDoc } from './model';
 
@@ -63,6 +64,7 @@ export const GUIDE_DOCS: readonly GuideDoc[] = [
   commitMessagesGuide,
   branchingStrategyGuide,
   mergeVsRebaseGuide,
+  resolvingConflictsGuide,
   gitignoreGuide,
   semverGuide,
   codeReviewGuide,

@@ -5,7 +5,7 @@ export const mergeDoc: CommandDoc = {
   id: 'merge',
   title: 'git merge',
   category: 'branches',
-  related: ['rebase', 'branch', 'merge-vs-rebase'],
+  related: ['rebase', 'branch', 'merge-vs-rebase', 'resolving-conflicts'],
   text: {
     fr: {
       summary: 'Intègre l’historique d’une autre branche dans la branche courante.',
