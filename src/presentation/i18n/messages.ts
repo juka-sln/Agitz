@@ -1,0 +1,222 @@
+import type { Language } from '@/shared/language';
+
+import { EDITOR_EN, EDITOR_FR } from './editorMessages';
+import { GITHUB_EN, GITHUB_FR } from './githubMessages';
+import { MISSIONS_EN, MISSIONS_FR } from './missionsMessages';
+import { SHORTCUTS_EN, SHORTCUTS_FR } from './shortcutsMessages';
+
+export type { Language } from '@/shared/language';
+
+const fr = {
+  'header.themeToLight': 'Passer au thème clair',
+  'header.themeToDark': 'Passer au thème sombre',
+  'header.languageSwitch': 'Switch to English',
+  'header.languageShort': 'EN',
+
+  'header.docs': 'Documentation',
+
+  'docs.title': 'Documentation',
+  'docs.intro':
+    'Une fiche par commande et des guides de bonnes pratiques. Dans le terminal, F1 ouvre la fiche de la commande en cours.',
+  'docs.close': 'Fermer la documentation',
+  'docs.back': 'Page précédente',
+  'docs.home': 'Sommaire',
+  'docs.search': 'Rechercher une commande ou un guide',
+  'docs.noResults': 'Aucun résultat pour « {query} ».',
+  'docs.commands': 'Commandes',
+  'docs.guides': 'Bonnes pratiques',
+  'docs.guide': 'Guide',
+  'docs.category.basics': 'Les bases',
+  'docs.category.branches': 'Branches et historique',
+  'docs.category.undo': 'Annuler et mettre de côté',
+  'docs.category.remote': 'Collaborer',
+  'docs.category.shell': 'Terminal',
+  'docs.section.description': 'Ce qu’elle fait',
+  'docs.section.options': 'Syntaxe et options',
+  'docs.section.examples': 'Exemples',
+  'docs.section.underTheHood': 'Sous le capot',
+  'docs.section.pitfalls': 'Pièges courants',
+  'docs.related': 'Voir aussi',
+
+  'files.title': 'Fichiers',
+  'files.empty': 'Aucun fichier pour l’instant. Crée-en un depuis le terminal :',
+  'files.notTracked': 'Pas encore de dépôt : Git ne suit aucun de ces fichiers.',
+  'files.status.untracked': 'Non suivi : Git ne connaît pas encore ce fichier',
+  'files.status.stagedAdded': 'Nouveau fichier ajouté à l’index',
+  'files.status.stagedModified': 'Modification ajoutée à l’index',
+  'files.status.stagedDeleted': 'Suppression ajoutée à l’index',
+  'files.status.modified': 'Modifié depuis le dernier git add',
+  'files.status.deleted': 'Supprimé du disque, pas encore dans l’index',
+  'files.status.conflict': 'Conflit : corrige les marqueurs <<<<<<< puis fais git add',
+
+  'graph.label': 'Graphe des commits',
+  'graph.noRepository.title': 'Aucun dépôt Git ici',
+  'graph.noRepository.body': 'Tape cette commande dans le terminal pour en créer un :',
+  'graph.noRepository.cloneBody': 'Rejoins le projet de l’équipe en clonant le dépôt partagé :',
+  'graph.noCommits.title': 'Dépôt prêt, aucun commit',
+  'graph.noCommits.body': 'Crée un fichier, ajoute-le à l’index, puis enregistre-le :',
+  'graph.head': 'Tu es ici : HEAD désigne le commit sur lequel tu travailles',
+  'graph.headDetached': 'HEAD détaché : tu n’es sur aucune branche',
+  'graph.unreachable': 'Aucune branche ne mène plus à ce commit',
+  'graph.mergeCommit': 'Commit de fusion : il réunit deux historiques',
+  'graph.tag': 'Tag : un nom fixe posé sur ce commit',
+  'graph.remoteBranch':
+    'Branche de suivi : où était cette branche sur le dépôt distant lors du dernier fetch, pull ou push',
+  'graph.summary': 'Commits : {count}, du plus récent au plus ancien. HEAD : {head}.',
+  'graph.summaryDetached': 'détaché sur {commit}',
+  'graph.controls': 'Contrôles du graphe',
+  'graph.zoomIn': 'Zoomer',
+  'graph.zoomOut': 'Dézoomer',
+  'graph.fitView': 'Afficher tout le graphe',
+  'graph.minimap': 'Vue d’ensemble du graphe',
+
+  'team.title': 'Équipe',
+  'team.add': 'Ajouter',
+  'team.newUserLabel': 'Prénom du coéquipier',
+  'team.active': 'poste actif',
+  'team.noRepository': 'aucun dépôt',
+  'team.error.empty': 'Donne un prénom à ton coéquipier.',
+  'team.error.tooLong': '{max} caractères au maximum.',
+  'team.error.invalid': 'Le prénom doit commencer par une lettre.',
+  'team.error.taken': 'Ce coéquipier existe déjà.',
+  'session.title': 'Session',
+  'session.saved': 'Ta session est enregistrée dans ce navigateur.',
+  'session.restart': 'Tout recommencer',
+  'session.restartWarning': 'Les postes, les dépôts et GitHub seront remis à zéro.',
+  'session.restartConfirm': 'Recommencer',
+  'session.cancel': 'Annuler',
+
+  'hosted.empty': 'Dépôt vide : personne n’a encore poussé.',
+  'hosted.branches': 'Branches sur GitHub',
+  'hosted.default': 'branche par défaut',
+  'hosted.open': 'Ouvrir sur GitHub',
+
+  'terminal.label': 'Terminal',
+  'terminal.inputLabel': 'Commande',
+  'terminal.welcome.title': 'Bienvenue dans Agitz.',
+  'terminal.welcome.body':
+    'Ce terminal simule un vrai shell avec Git. Tape help pour voir les commandes, ou commence par :',
+  'terminal.welcome.user':
+    'Tu es sur le poste de {user}. Change de coéquipier dans le panneau Équipe pour travailler à plusieurs.',
+  'terminal.welcome.cloneBody': 'Rejoins le projet partagé sur GitHub :',
+  'terminal.completions': 'Suggestions :',
+  'terminal.keyboardHelp':
+    'Entrée exécute la commande, flèches haut et bas pour l’historique, Tab complète une commande commencée, F1 ouvre la documentation de la commande, Échap quitte le terminal.',
+  'terminal.learnMore': 'En savoir plus',
+  'terminal.learnMoreAbout': 'En savoir plus sur {command}',
+  'terminal.learnMoreTarget': 'sur {command}',
+
+  ...GITHUB_FR,
+  ...EDITOR_FR,
+  ...SHORTCUTS_FR,
+  ...MISSIONS_FR,
+} as const;
+
+export type MessageKey = keyof typeof fr;
+
+const en: Record<MessageKey, string> = {
+  'header.themeToLight': 'Switch to light theme',
+  'header.themeToDark': 'Switch to dark theme',
+  'header.languageSwitch': 'Passer en français',
+  'header.languageShort': 'FR',
+
+  'header.docs': 'Documentation',
+
+  'docs.title': 'Documentation',
+  'docs.intro':
+    'One page per command, plus best practice guides. In the terminal, F1 opens the page of the command being typed.',
+  'docs.close': 'Close the documentation',
+  'docs.back': 'Previous page',
+  'docs.home': 'Contents',
+  'docs.search': 'Search a command or a guide',
+  'docs.noResults': 'No results for "{query}".',
+  'docs.commands': 'Commands',
+  'docs.guides': 'Best practices',
+  'docs.guide': 'Guide',
+  'docs.category.basics': 'Basics',
+  'docs.category.branches': 'Branches and history',
+  'docs.category.undo': 'Undo and set aside',
+  'docs.category.remote': 'Collaborate',
+  'docs.category.shell': 'Terminal',
+  'docs.section.description': 'What it does',
+  'docs.section.options': 'Syntax and options',
+  'docs.section.examples': 'Examples',
+  'docs.section.underTheHood': 'Under the hood',
+  'docs.section.pitfalls': 'Common pitfalls',
+  'docs.related': 'See also',
+
+  'files.title': 'Files',
+  'files.empty': 'No files yet. Create one from the terminal:',
+  'files.notTracked': 'No repository yet: Git does not track any of these files.',
+  'files.status.untracked': 'Untracked: Git does not know this file yet',
+  'files.status.stagedAdded': 'New file added to the index',
+  'files.status.stagedModified': 'Change added to the index',
+  'files.status.stagedDeleted': 'Deletion added to the index',
+  'files.status.modified': 'Modified since the last git add',
+  'files.status.deleted': 'Deleted from disk, not in the index yet',
+  'files.status.conflict': 'Conflict: fix the <<<<<<< markers, then run git add',
+
+  'graph.label': 'Commit graph',
+  'graph.noRepository.title': 'No Git repository here',
+  'graph.noRepository.body': 'Type this command in the terminal to create one:',
+  'graph.noRepository.cloneBody': 'Join the team’s project by cloning the shared repository:',
+  'graph.noCommits.title': 'Repository ready, no commits yet',
+  'graph.noCommits.body': 'Create a file, add it to the index, then record it:',
+  'graph.head': 'You are here: HEAD is the commit you are working on',
+  'graph.headDetached': 'Detached HEAD: you are not on any branch',
+  'graph.unreachable': 'No branch leads to this commit anymore',
+  'graph.mergeCommit': 'Merge commit: it joins two histories',
+  'graph.tag': 'Tag: a fixed name on this commit',
+  'graph.remoteBranch':
+    'Remote-tracking branch: where this branch was on the remote at the last fetch, pull or push',
+  'graph.summary': 'Commits: {count}, newest first. HEAD: {head}.',
+  'graph.summaryDetached': 'detached at {commit}',
+  'graph.controls': 'Graph controls',
+  'graph.zoomIn': 'Zoom in',
+  'graph.zoomOut': 'Zoom out',
+  'graph.fitView': 'Show the whole graph',
+  'graph.minimap': 'Graph overview',
+
+  'team.title': 'Team',
+  'team.add': 'Add',
+  'team.newUserLabel': 'Teammate’s first name',
+  'team.active': 'active workstation',
+  'team.noRepository': 'no repository',
+  'team.error.empty': 'Give your teammate a name.',
+  'team.error.tooLong': '{max} characters at most.',
+  'team.error.invalid': 'The name must start with a letter.',
+  'team.error.taken': 'This teammate already exists.',
+  'session.title': 'Session',
+  'session.saved': 'Your session is saved in this browser.',
+  'session.restart': 'Start over',
+  'session.restartWarning': 'Workstations, repositories and GitHub will be reset.',
+  'session.restartConfirm': 'Start over',
+  'session.cancel': 'Cancel',
+
+  'hosted.empty': 'Empty repository: nobody pushed yet.',
+  'hosted.branches': 'Branches on GitHub',
+  'hosted.default': 'default branch',
+  'hosted.open': 'Open on GitHub',
+
+  'terminal.label': 'Terminal',
+  'terminal.inputLabel': 'Command',
+  'terminal.welcome.title': 'Welcome to Agitz.',
+  'terminal.welcome.body':
+    'This terminal simulates a real shell with Git. Type help to list the commands, or start with:',
+  'terminal.welcome.user':
+    'You are on {user}’s workstation. Switch teammates in the Team panel to work together.',
+  'terminal.welcome.cloneBody': 'Join the shared project on GitHub:',
+  'terminal.completions': 'Suggestions:',
+  'terminal.keyboardHelp':
+    'Enter runs the command, up and down arrows browse history, Tab completes a started command, F1 opens the documentation of the command, Escape leaves the terminal.',
+  'terminal.learnMore': 'Learn more',
+  'terminal.learnMoreAbout': 'Learn more about {command}',
+  'terminal.learnMoreTarget': 'about {command}',
+
+  ...GITHUB_EN,
+  ...EDITOR_EN,
+  ...SHORTCUTS_EN,
+  ...MISSIONS_EN,
+};
+
+export const MESSAGES: Record<Language, Record<MessageKey, string>> = { fr, en };
