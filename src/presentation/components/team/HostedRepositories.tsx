@@ -5,12 +5,14 @@ import { shortHash } from '@/domain/value-objects/Hash';
 
 import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useGitHubStore } from '../../stores/githubStore';
 
 /** What the virtual GitHub holds right now, so pushes from any workstation are visible at once. */
 export function HostedRepositories() {
   const { t } = useTranslation();
   const network = useSession((state) => state.network);
   const repositories = useMemo(() => getHostedRepositories(network), [network]);
+  const openOnGitHub = useGitHubStore((state) => state.open);
 
   return (
     <section aria-labelledby="hosted-title" className="border-rule border-t px-4 py-3">
@@ -30,6 +32,16 @@ export function HostedRepositories() {
                 </span>
               ))}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                openOnGitHub(repository.url);
+              }}
+              className="text-ink-muted hover:text-ink mt-0.5 text-xs font-semibold underline underline-offset-2"
+            >
+              {t('hosted.open')}
+              <span className="sr-only"> {repository.url}</span>
+            </button>
             {repository.branches.length === 0 ? (
               <p className="text-ink-muted mt-0.5">{t('hosted.empty')}</p>
             ) : (

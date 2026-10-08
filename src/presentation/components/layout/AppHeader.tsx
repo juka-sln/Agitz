@@ -1,7 +1,9 @@
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
+import { useGitHubStore } from '../../stores/githubStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
 import { DOCS_PANEL_ID } from '../docs/DocsPanel';
+import { GITHUB_PANEL_ID } from '../github/GitHubPanel';
 
 /** Two transit lines forking at a station: the branch in its simplest form. */
 function LogoMark() {
@@ -74,6 +76,25 @@ function BookIcon() {
   );
 }
 
+/** The octocat silhouette would be a brand mark: a pull request icon says the same thing. */
+function PullRequestIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="6" cy="5" r="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <circle cx="6" cy="19" r="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <circle cx="18" cy="19" r="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M6 7.5v9M18 16.5V9a3 3 0 0 0-3-3h-4m2-2.5L10.5 6 13 8.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const buttonClass =
   'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';
 
@@ -84,6 +105,8 @@ export function AppHeader() {
   const toggleLanguage = usePreferencesStore((state) => state.toggleLanguage);
   const isDocsOpen = useDocsStore((state) => state.isOpen);
   const toggleDocs = useDocsStore((state) => state.toggle);
+  const isGitHubOpen = useGitHubStore((state) => state.isOpen);
+  const toggleGitHub = useGitHubStore((state) => state.toggle);
 
   return (
     <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-4">
@@ -92,6 +115,16 @@ export function AppHeader() {
         <h1 className="text-ink text-lg font-bold tracking-tight">Agitz</h1>
       </div>
       <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className={`${buttonClass} gap-1.5`}
+          onClick={toggleGitHub}
+          aria-expanded={isGitHubOpen}
+          aria-controls={isGitHubOpen ? GITHUB_PANEL_ID : undefined}
+        >
+          <PullRequestIcon />
+          <span className="sr-only sm:not-sr-only">{t('header.github')}</span>
+        </button>
         <button
           type="button"
           className={`${buttonClass} gap-1.5`}
