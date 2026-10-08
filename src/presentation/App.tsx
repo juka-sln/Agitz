@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { FileExplorer } from './components/files/FileExplorer';
 import { CommitGraphView } from './components/graph/CommitGraphView';
 import { AppHeader } from './components/layout/AppHeader';
+import { GlobalShortcuts } from './components/shortcuts/GlobalShortcuts';
 import { HostedRepositories } from './components/team/HostedRepositories';
 import { RestartSession } from './components/team/RestartSession';
 import { UserSwitcher } from './components/team/UserSwitcher';
@@ -88,6 +89,7 @@ export function App({ store }: { store: SessionStore }) {
 
   return (
     <SessionProvider store={store}>
+      <GlobalShortcuts />
       <div className="bg-canvas text-ink grid h-full grid-rows-[auto_1fr]">
         <AppHeader />
         <div className="grid min-h-0 grid-cols-1 md:grid-cols-[15rem_1fr]">

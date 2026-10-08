@@ -4,6 +4,8 @@ import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
 import { useGitHubStore } from '../../stores/githubStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
+import { useShortcutsStore } from '../../stores/shortcutsStore';
+import { ariaKeyShortcut } from '../shortcuts/globalShortcuts';
 
 import { DOCS_PANEL_ID, EDITOR_PANEL_ID, GITHUB_PANEL_ID } from './panelIds';
 
@@ -111,6 +113,29 @@ function PencilIcon() {
   );
 }
 
+function KeyboardIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <rect
+        x="2.5"
+        y="6"
+        width="19"
+        height="12"
+        rx="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M6.5 10h1M10.5 10h1M14.5 10h1M8 14h8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 const buttonClass =
   'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';
 
@@ -126,6 +151,7 @@ export function AppHeader() {
   const isEditorOpen = useEditorStore((state) => state.isOpen);
   const toggleEditor = useEditorStore((state) => state.toggle);
   const conflictCount = useConflictResolution()?.files.length ?? 0;
+  const openShortcuts = useShortcutsStore((state) => state.open);
 
   return (
     <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-4">
@@ -138,6 +164,7 @@ export function AppHeader() {
           type="button"
           className={`${buttonClass} gap-1.5`}
           onClick={toggleEditor}
+          aria-keyshortcuts={ariaKeyShortcut('toggleEditor')}
           aria-expanded={isEditorOpen}
           aria-controls={isEditorOpen ? EDITOR_PANEL_ID : undefined}
         >
@@ -154,6 +181,7 @@ export function AppHeader() {
           type="button"
           className={`${buttonClass} gap-1.5`}
           onClick={toggleGitHub}
+          aria-keyshortcuts={ariaKeyShortcut('toggleGitHub')}
           aria-expanded={isGitHubOpen}
           aria-controls={isGitHubOpen ? GITHUB_PANEL_ID : undefined}
         >
@@ -164,11 +192,22 @@ export function AppHeader() {
           type="button"
           className={`${buttonClass} gap-1.5`}
           onClick={toggleDocs}
+          aria-keyshortcuts={ariaKeyShortcut('toggleDocs')}
           aria-expanded={isDocsOpen}
           aria-controls={isDocsOpen ? DOCS_PANEL_ID : undefined}
         >
           <BookIcon />
           <span className="sr-only sm:not-sr-only">{t('header.docs')}</span>
+        </button>
+        <button
+          type="button"
+          className={buttonClass}
+          onClick={openShortcuts}
+          aria-keyshortcuts="?"
+          title={t('header.shortcuts')}
+        >
+          <KeyboardIcon />
+          <span className="sr-only">{t('header.shortcuts')}</span>
         </button>
         <button
           type="button"

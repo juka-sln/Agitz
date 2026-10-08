@@ -2,3 +2,6 @@
 export const DOCS_PANEL_ID = 'docs-panel';
 export const GITHUB_PANEL_ID = 'github-panel';
 export const EDITOR_PANEL_ID = 'editor-panel';
+
+/** The command line, which keyboard shortcuts bring focus back to. */
+export const TERMINAL_INPUT_ID = 'terminal-input';

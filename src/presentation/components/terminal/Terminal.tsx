@@ -9,6 +9,7 @@ import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
+import { TERMINAL_INPUT_ID } from '../layout/panelIds';
 
 import { completeInput } from './completeInput';
 import { Prompt } from './Prompt';
@@ -176,6 +177,7 @@ export function Terminal() {
         <div className="flex">
           <Prompt parts={describePrompt(workspace)} />
           <input
+            id={TERMINAL_INPUT_ID}
             ref={inputRef}
             value={input}
             onChange={(event) => {
