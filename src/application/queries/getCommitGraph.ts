@@ -15,6 +15,8 @@ export interface GraphCommit {
   readonly hash: Hash;
   readonly subject: string;
   readonly author: Identity;
+  /** Kept by rebase, cherry-pick and amend, which tells a replayed commit's original. */
+  readonly authoredAt: Timestamp;
   readonly committedAt: Timestamp;
   readonly parents: readonly Hash[];
   /** Chronological position, 0 being the oldest commit. */
@@ -115,6 +117,7 @@ export function getCommitGraph(repository: Repository): CommitGraph {
     hash: commit.hash,
     subject: commitSubject(commit.message),
     author: commit.author,
+    authoredAt: commit.authoredAt,
     committedAt: commit.committedAt,
     parents: commit.parents,
     column,
