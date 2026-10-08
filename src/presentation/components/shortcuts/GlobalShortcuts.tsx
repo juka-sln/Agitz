@@ -4,6 +4,7 @@ import { useSession } from '../../hooks/useSession';
 import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
 import { useGitHubStore } from '../../stores/githubStore';
+import { useMissionsStore } from '../../stores/missionsStore';
 import { useShortcutsStore } from '../../stores/shortcutsStore';
 import { TERMINAL_INPUT_ID } from '../layout/panelIds';
 
@@ -30,6 +31,9 @@ export function GlobalShortcuts() {
           return;
         case 'toggleEditor':
           useEditorStore.getState().toggle();
+          return;
+        case 'toggleMissions':
+          useMissionsStore.getState().toggle();
           return;
         case 'nextUser': {
           const index = users.findIndex((user) => user.id === activeUserId);

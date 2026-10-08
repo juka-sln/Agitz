@@ -1,5 +1,11 @@
 export type GlobalShortcut =
-  'focusTerminal' | 'toggleDocs' | 'toggleGitHub' | 'toggleEditor' | 'nextUser' | 'showShortcuts';
+  | 'focusTerminal'
+  | 'toggleDocs'
+  | 'toggleGitHub'
+  | 'toggleEditor'
+  | 'toggleMissions'
+  | 'nextUser'
+  | 'showShortcuts';
 
 export type PanelShortcut = Exclude<GlobalShortcut, 'showShortcuts'>;
 
@@ -13,6 +19,7 @@ export const SHORTCUT_LETTERS: Readonly<Record<PanelShortcut, string>> = {
   toggleDocs: 'D',
   toggleGitHub: 'G',
   toggleEditor: 'E',
+  toggleMissions: 'M',
   nextUser: 'U',
 };
 
