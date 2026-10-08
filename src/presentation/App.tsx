@@ -106,13 +106,13 @@ export function App({ store }: { store: SessionStore }) {
       <div className="bg-canvas text-ink grid h-full grid-rows-[auto_1fr]">
         <AppHeader />
         <div className="grid min-h-0 grid-cols-1 md:grid-cols-[15rem_1fr]">
-          <aside className="border-rule bg-surface order-last flex max-h-72 min-h-0 flex-col overflow-y-auto border-t md:order-first md:max-h-none md:border-t-0 md:border-r">
+          <aside className="border-rule bg-surface relative order-last flex max-h-72 min-h-0 flex-col overflow-y-auto border-t md:order-first md:max-h-none md:border-t-0 md:border-r">
             <UserSwitcher />
             <FileExplorer />
             <HostedRepositories />
             <RestartSession />
           </aside>
-          <main className="relative grid min-h-0 grid-rows-[minmax(16rem,1fr)_minmax(14rem,40%)]">
+          <main className="relative grid min-h-0 grid-rows-[minmax(12rem,1fr)_minmax(10rem,40%)]">
             <section className="relative min-h-0">
               <CommitGraphView />
             </section>

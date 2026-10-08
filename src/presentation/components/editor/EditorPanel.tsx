@@ -111,7 +111,7 @@ export function EditorPanel() {
           <span className="sr-only">{t('editor.close')}</span>
         </button>
       </div>
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-8">
+      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-8">
         {path !== null ? (
           <FileEditor key={`${userId}:${path}`} path={path} headingRef={headingRef} onOpen={open} />
         ) : resolution !== null ? (

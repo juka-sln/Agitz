@@ -45,7 +45,7 @@ export function FileExplorer() {
   const [isCreating, setIsCreating] = useState(false);
 
   return (
-    <nav aria-label={t('files.title')} className="flex min-h-40 flex-1 flex-col">
+    <nav aria-label={t('files.title')} className="flex min-h-40 shrink-0 grow flex-col">
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h2 className="text-ink text-sm font-bold">{t('files.title')}</h2>
         <button
