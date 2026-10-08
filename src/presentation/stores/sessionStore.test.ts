@@ -86,4 +86,43 @@ describe('sessionStore', () => {
       expect(store.getState().workspace.path).toBe('/home/carol/project');
     });
   });
+
+  describe('on the virtual GitHub', () => {
+    const PUBLISH = [
+      'git init',
+      'mkdir .github',
+      'echo "name: CI" > .github/workflows/ci.yml',
+      'git add .',
+      'git commit -m "ci: add workflow"',
+      'git remote add origin https://github.com/alice/project.git',
+      'git push -u origin main',
+    ];
+
+    it('runs the CI workflow when a push moves a branch', () => {
+      const store = createTestSessionStore(PUBLISH);
+
+      expect(store.getState().github.workflowRuns).toMatchObject([
+        { id: 1, branch: 'main', conclusion: 'success' },
+      ]);
+    });
+
+    it('performs web actions as the active user and reports refusals', () => {
+      const store = createTestSessionStore(PUBLISH);
+      const fork = () =>
+        store.getState().act((actions, state) =>
+          actions.forkRepository.execute(state, {
+            url: 'https://github.com/alice/project.git',
+            owner: store.getState().activeUser,
+          }),
+        );
+
+      expect(fork()).toEqual({ code: 'cannotForkOwnRepository', params: {} });
+      store.getState().switchUser('bob');
+      expect(fork()).toBeNull();
+      expect(Object.keys(store.getState().network.repositories)).toEqual([
+        'https://github.com/alice/project.git',
+        'https://github.com/bob/project.git',
+      ]);
+    });
+  });
 });

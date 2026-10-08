@@ -2,7 +2,15 @@ import { createStore } from 'zustand/vanilla';
 
 import type { Explanation } from '@/application/git-commands/GitCommand';
 import type { CommandResult } from '@/application/git-commands/runGitCommand';
+import type { GitHubActions } from '@/application/github-features/GitHubActions';
+import {
+  runGitHubAction,
+  type GitHubProblem,
+  type HostingState,
+} from '@/application/github-features/HostingState';
+import { runWorkflows } from '@/application/github-features/runWorkflows';
 import type { TeamSetup } from '@/application/simulation/teamSetup';
+import type { GitHub } from '@/domain/entities/GitHub';
 import type { Network } from '@/domain/entities/Network';
 import {
   createSimulatedUser,
@@ -42,6 +50,10 @@ export interface SessionState {
   readonly otherWorkstations: Readonly<Record<string, Workstation>>;
   /** Repositories hosted on the virtual GitHub, shared by every workstation. */
   readonly network: Network;
+  /** Pull requests, issues and CI runs of the virtual GitHub. */
+  readonly github: GitHub;
+  /** The web interface of the virtual GitHub, also used to query pull request statuses. */
+  readonly gitHubActions: GitHubActions;
 
   // The active workstation, kept flat because nearly every component reads it.
   readonly workspace: Workspace;
@@ -56,6 +68,10 @@ export interface SessionState {
   readonly switchUser: (userId: string) => void;
   /** Creates a teammate with an empty workstation, or tells why the name is refused. */
   readonly addUser: (name: string) => UserNameProblem | null;
+  /** Performs an action on the virtual GitHub as the active user, or tells why it is refused. */
+  readonly act: (
+    perform: (actions: GitHubActions, state: HostingState) => HostingState,
+  ) => GitHubProblem | null;
 }
 
 export type SessionStore = ReturnType<typeof createSessionStore>;
@@ -86,7 +102,7 @@ function flatten({ user, ...workstation }: Workstation) {
   return { activeUser: user, ...workstation };
 }
 
-export function createSessionStore(shell: Shell, team: TeamSetup) {
+export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions: GitHubActions) {
   const [firstUser, ...otherUsers] = team.users;
   if (firstUser === undefined) {
     throw new Error('A session needs at least one user');
@@ -96,6 +112,8 @@ export function createSessionStore(shell: Shell, team: TeamSetup) {
   return createStore<SessionState>()((set, get) => ({
     users: team.users,
     network: team.network,
+    github: team.github,
+    gitHubActions,
     otherWorkstations: Object.fromEntries(
       otherUsers.map((user) => [user.id, createWorkstation(user)]),
     ),
@@ -109,8 +127,13 @@ export function createSessionStore(shell: Shell, team: TeamSetup) {
         return;
       }
 
-      const { workspace, commandHistory, entries, network } = get();
+      const { workspace, commandHistory, entries, network, github } = get();
       const result = shell.execute(trimmed, workspace, network);
+      // A push reaches GitHub, which runs the CI workflow on the branches it moved.
+      const hosting =
+        result.network === undefined
+          ? { network, github }
+          : runWorkflows({ network: result.network, github }, network);
       const entry: TerminalEntry = {
         id: nextId,
         workspaceBefore: workspace,
@@ -123,7 +146,8 @@ export function createSessionStore(shell: Shell, team: TeamSetup) {
 
       set({
         workspace: result.workspace,
-        network: result.network ?? network,
+        network: hosting.network,
+        github: hosting.github,
         entries: [...entries, entry],
         lastResult: result,
         commandHistory:
@@ -167,6 +191,16 @@ export function createSessionStore(shell: Shell, team: TeamSetup) {
         users: [...users, user],
         otherWorkstations: { ...otherWorkstations, [user.id]: createWorkstation(user) },
       });
+      return null;
+    },
+
+    act(perform) {
+      const { network, github } = get();
+      const result = runGitHubAction({ network, github }, (state) => perform(gitHubActions, state));
+      if (!result.ok) {
+        return result.problem;
+      }
+      set({ network: result.state.network, github: result.state.github });
       return null;
     },
   }));
