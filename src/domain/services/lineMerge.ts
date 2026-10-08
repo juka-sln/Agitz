@@ -140,3 +140,10 @@ export function mergeLines(
   const content = merged.join('\n');
   return { content: merged.length > 0 && endsWithNewline ? `${content}\n` : content, conflicted };
 }
+
+const CONFLICT_MARKER_LINE = /^(?:<{7}|>{7})(?: |$)/m;
+
+/** Whether a file still holds the markers of an unresolved conflict. */
+export function containsConflictMarkers(content: string): boolean {
+  return CONFLICT_MARKER_LINE.test(content);
+}

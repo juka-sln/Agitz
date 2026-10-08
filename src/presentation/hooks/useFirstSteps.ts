@@ -1,3 +1,5 @@
+import { hostedRepositoryUrls } from '@/domain/entities/Network';
+
 import { useSession } from './useSession';
 
 const START_STEPS = ['git init', 'echo "# My project" > README.md', 'git status'];
@@ -10,7 +12,7 @@ export interface FirstSteps {
 
 export function useFirstSteps(): FirstSteps {
   const isFirstUser = useSession((state) => state.activeUser.id === state.users[0]?.id);
-  const sharedUrl = useSession((state) => Object.keys(state.network)[0]);
+  const sharedUrl = useSession((state) => hostedRepositoryUrls(state.network)[0]);
   if (isFirstUser || sharedUrl === undefined) {
     return { joinsByCloning: false, steps: START_STEPS };
   }

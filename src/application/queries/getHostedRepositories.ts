@@ -16,7 +16,7 @@ export interface HostedRepositorySummary {
 }
 
 export function getHostedRepositories(network: Network): HostedRepositorySummary[] {
-  return Object.entries(network)
+  return Object.entries(network.repositories)
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([url, repository]) => {
       const defaultBranch = repository.head.type === 'attached' ? repository.head.branch : null;
