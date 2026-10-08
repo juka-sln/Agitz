@@ -1,14 +1,32 @@
 # Agitz
 
-Learn Git and GitHub visually and interactively, entirely in the browser.
+Learn Git and GitHub from A to Z, visually and interactively, entirely in the browser.
 
-Agitz simulates a Git engine, a GitHub server and several teammates so you can practice
-branching, merging, rebasing, pull requests and conflict resolution without a real GitHub account,
-an internet connection or anyone to practice with.
+Agitz is an interactive Git playground for beginners and self-taught developers. Type real `git`
+commands in a terminal and watch the commit graph redraw instantly, with a plain explanation of what
+each command did and why. A simulated Git engine, a simulated GitHub and virtual teammates let you
+practice everything from your first commit to reviewing and merging pull requests, without a GitHub
+account, an internet connection or anyone to practice with.
 
 **[Try it online](https://juka-sln.github.io/Agitz/)**
 
 ![Agitz: a commit graph drawn as a transit map above a terminal](docs/screenshot.png)
+
+## From A to Z
+
+Agitz starts from an empty folder and takes you all the way to team workflows on GitHub:
+
+1. **The basics:** create a repository, stage files and record commits with clear messages.
+2. **Branches:** branch out, merge, and read the history as a graph.
+3. **Undoing things:** revert, reset, stash work in progress and cherry-pick a single commit.
+4. **Releases:** tag versions following semantic versioning.
+5. **Rewriting history:** rebase a branch and see its commits being replayed.
+6. **Remotes:** clone, fetch, pull and push to a shared repository.
+7. **Teamwork:** switch between teammates, run into a conflict and resolve it.
+8. **GitHub:** fork, open a pull request, request a review, protect a branch and merge.
+
+You can explore freely in a sandbox, or follow a guided course whose missions walk through these
+steps in order.
 
 ## Features
 
