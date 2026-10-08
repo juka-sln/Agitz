@@ -58,7 +58,7 @@ export function CommandDocPage({ doc, headingRef, onOpen }: CommandDocPageProps)
         <ul className="space-y-3">
           {text.examples.map((example) => (
             <li key={example.command}>
-              <pre className="bg-terminal text-terminal-ink overflow-x-auto rounded-md px-3 py-2 font-mono text-[13px]">
+              <pre className="bg-terminal text-terminal-ink rounded-md px-3 py-2 font-mono text-[13px] break-all whitespace-pre-wrap">
                 <span className="text-terminal-muted select-none">$ </span>
                 <code>{example.command}</code>
               </pre>
