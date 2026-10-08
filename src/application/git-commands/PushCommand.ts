@@ -1,5 +1,14 @@
+import {
+  CI_CHECK_NAME,
+  findProtectedPushViolation,
+  type ProtectedPushViolation,
+} from '@/domain/entities/BranchProtection';
 import { attachedHead } from '@/domain/entities/Head';
-import { storeHostedRepository, type Network } from '@/domain/entities/Network';
+import {
+  findBranchProtection,
+  storeHostedRepository,
+  type Network,
+} from '@/domain/entities/Network';
 import { remoteTrackingName, upstreamName } from '@/domain/entities/Remote';
 import {
   branchNames,
@@ -78,6 +87,8 @@ interface PushState {
   readonly lines: RefUpdateLine[];
   readonly errors: string[];
   readonly rejections: { readonly reason: Rejection; readonly push: RefPush }[];
+  /** Updates the server refused after receiving them, because the branch is protected. */
+  readonly declined: { readonly violation: ProtectedPushViolation; readonly push: RefPush }[];
   readonly upstreamsSet: string[];
 }
 
@@ -97,6 +108,20 @@ const HINTS: Record<Rejection, readonly string[]> = {
   ],
   'already exists': ['Updates were rejected because the tag already exists in the remote.'],
   'stale info': [],
+};
+
+const PROTECTION_EXPLANATIONS: Record<ProtectedPushViolation, string> = {
+  delete: 'push.protectedDelete',
+  forcePush: 'push.protectedForce',
+  pullRequest: 'push.protectedPullRequest',
+  statusCheck: 'push.protectedStatusCheck',
+};
+
+const PROTECTION_ERRORS: Record<ProtectedPushViolation, string> = {
+  delete: 'Cannot delete this branch',
+  forcePush: 'Cannot force-push to this branch',
+  pullRequest: 'Changes must be made through a pull request.',
+  statusCheck: `Required status check "${CI_CHECK_NAME}" is expected.`,
 };
 
 const REJECTION_EXPLANATIONS: Record<Rejection, string> = {
@@ -123,14 +148,20 @@ export class PushCommand implements GitCommand<PushInput> {
       lines: [],
       errors: [],
       rejections: [],
+      declined: [],
       upstreamsSet: [],
     };
     for (const push of pushes) {
       this.pushRef(state, remote, push, input);
     }
 
-    const failed = state.errors.length > 0 || state.rejections.length > 0;
+    const failed =
+      state.errors.length > 0 || state.rejections.length > 0 || state.declined.length > 0;
     const output = [
+      ...state.declined.flatMap(({ violation, push }) => [
+        `remote: error: GH006: Protected branch update failed for refs/heads/${push.destination}.`,
+        `remote: error: ${PROTECTION_ERRORS[violation]}`,
+      ]),
       ...(state.lines.length > 0
         ? [`To ${remote.url}`, ...formatRefUpdates(state.lines, 'push')]
         : []),
@@ -304,8 +335,16 @@ export class PushCommand implements GitCommand<PushInput> {
         : findTag(state.hosted, push.destination)?.target;
     const trackingName = remoteTrackingName(remote.name, push.destination);
     const line = { from: push.label, to: push.destination };
+    const protection =
+      push.kind === 'branch'
+        ? findBranchProtection(input.network, remote.url, push.destination)
+        : undefined;
 
     if (push.source === null) {
+      if (remoteTip !== undefined && protection !== undefined) {
+        this.decline(state, push, 'delete');
+        return;
+      }
       if (remoteTip === undefined) {
         state.errors.push(
           `error: unable to delete '${push.destination}': remote ref does not exist`,
@@ -333,6 +372,16 @@ export class PushCommand implements GitCommand<PushInput> {
       state.rejections.push({ reason: rejection, push });
       state.lines.push({ flag: '!', summary: '[rejected]', ...line, reason: rejection });
       return;
+    }
+
+    if (remoteTip !== push.source && protection !== undefined) {
+      const fastForward =
+        remoteTip === undefined || isAncestor(state.local, remoteTip, push.source);
+      const violation = findProtectedPushViolation(protection, { deletes: false, fastForward });
+      if (violation !== null) {
+        this.decline(state, push, violation);
+        return;
+      }
     }
 
     if (remoteTip !== push.source) {
@@ -368,6 +417,19 @@ export class PushCommand implements GitCommand<PushInput> {
         state.upstreamsSet.push(push.localBranch);
       }
     }
+  }
+
+  private decline(state: PushState, push: RefPush, violation: ProtectedPushViolation): void {
+    state.declined.push({ violation, push });
+    state.lines.push({
+      flag: '!',
+      summary: '[remote rejected]',
+      // Like other deletions, a refused one names only the remote ref.
+      ...(push.source === null
+        ? { from: push.destination, to: null }
+        : { from: push.label, to: push.destination }),
+      reason: 'protected branch hook declined',
+    });
   }
 
   /** Why the remote would refuse to move its ref to `push.source`, if it would. */
@@ -427,6 +489,13 @@ export class PushCommand implements GitCommand<PushInput> {
   }
 
   private explainPush(state: PushState, remote: NamedRemote): Explanation {
+    const declined = state.declined[0];
+    if (declined !== undefined) {
+      return explain(PROTECTION_EXPLANATIONS[declined.violation], {
+        remote: remote.name,
+        branch: declined.push.destination,
+      });
+    }
     const first = state.rejections[0];
     if (first !== undefined) {
       return explain(REJECTION_EXPLANATIONS[first.reason], {

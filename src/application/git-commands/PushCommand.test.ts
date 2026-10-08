@@ -1,3 +1,8 @@
+import {
+  DEFAULT_BRANCH_PROTECTION,
+  type BranchProtection,
+} from '@/domain/entities/BranchProtection';
+import { setBranchProtection } from '@/domain/entities/Network';
 import { getHeadCommitHash } from '@/domain/entities/Repository';
 import { shortHash } from '@/domain/value-objects/Hash';
 import { GitTestBench } from '@/test/fixtures/GitTestBench';
@@ -230,5 +235,97 @@ describe('PushCommand', () => {
 
     expect(result.output).toBe(['error: src refspec nope does not match any', FAILED].join('\n'));
     expect(result.exitCode).toBe(1);
+  });
+
+  describe('to a protected branch', () => {
+    function protectedTeam(protection: BranchProtection = DEFAULT_BRANCH_PROTECTION) {
+      const team = new TeamBench().share();
+      team.network = setBranchProtection(team.network, ORIGIN_URL, 'main', protection);
+      return team;
+    }
+
+    const declined = (branch: string, error: string) => [
+      `remote: error: GH006: Protected branch update failed for refs/heads/${branch}.`,
+      `remote: error: ${error}`,
+      TO,
+      ` ! [remote rejected] ${branch} -> ${branch} (protected branch hook declined)`,
+      FAILED,
+    ];
+
+    it('requires a pull request instead of a direct push', () => {
+      const team = protectedTeam();
+      const before = team.hosted.branches.main;
+      team.alice.commit('feat: add greeting', { 'hello.txt': 'Hi\n' });
+
+      const result = team.online(team.alice, push, {});
+      expect(result.output).toBe(
+        declined('main', 'Changes must be made through a pull request.').join('\n'),
+      );
+      expect(result.exitCode).toBe(1);
+      expect(result.explanation).toEqual({
+        key: 'push.protectedPullRequest',
+        params: { remote: 'origin', branch: 'main' },
+      });
+      expect(team.hosted.branches.main).toBe(before);
+      expect(team.alice.repository.remoteBranches['origin/main']).toBe(before);
+    });
+
+    it('still accepts pushes to other branches', () => {
+      const team = protectedTeam();
+      team.alice.run(new CheckoutCommand(team.context), { targets: [], newBranch: 'feature' });
+      team.alice.commit('feat: add greeting', { 'hello.txt': 'Hi\n' });
+
+      const result = team.online(team.alice, push, { remote: 'origin', refspecs: ['feature'] });
+      expect(result.exitCode).toBe(0);
+      expect(team.hosted.branches.feature).toBe(team.alice.headCommit.hash);
+    });
+
+    it('refuses forced pushes and deletions even when direct pushes are allowed', () => {
+      const team = protectedTeam({ ...DEFAULT_BRANCH_PROTECTION, requirePullRequest: false });
+      team.alice.run(new CommitCommand(team.context), {
+        messages: ['feat: reworded'],
+        amend: true,
+      });
+
+      expect(team.online(team.alice, push, { force: true }).output).toBe(
+        declined('main', 'Cannot force-push to this branch').join('\n'),
+      );
+      const deletion = team.online(team.alice, push, { remote: 'origin', refspecs: [':main'] });
+      expect(deletion.output).toBe(
+        [
+          'remote: error: GH006: Protected branch update failed for refs/heads/main.',
+          'remote: error: Cannot delete this branch',
+          TO,
+          ' ! [remote rejected] main (protected branch hook declined)',
+          FAILED,
+        ].join('\n'),
+      );
+      expect(deletion.explanation.key).toBe('push.protectedDelete');
+    });
+
+    it('lets fast-forward pushes through when only force pushes are blocked', () => {
+      const team = protectedTeam({
+        requirePullRequest: false,
+        requiredApprovals: 0,
+        requireStatusChecks: false,
+      });
+      team.alice.commit('feat: add greeting', { 'hello.txt': 'Hi\n' });
+
+      expect(team.online(team.alice, push, {}).exitCode).toBe(0);
+      expect(team.hosted.branches.main).toBe(team.alice.headCommit.hash);
+    });
+
+    it('waits for a passing status check when one is required', () => {
+      const team = protectedTeam({
+        requirePullRequest: false,
+        requiredApprovals: 0,
+        requireStatusChecks: true,
+      });
+      team.alice.commit('feat: add greeting', { 'hello.txt': 'Hi\n' });
+
+      expect(team.online(team.alice, push, {}).output).toContain(
+        'remote: error: Required status check "ci" is expected.',
+      );
+    });
   });
 });

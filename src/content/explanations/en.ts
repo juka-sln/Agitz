@@ -194,6 +194,14 @@ export const en: Record<keyof typeof fr, ExplanationText> = {
     'Rejected: the tag already exists on the remote with another commit. A published tag should never move.',
   'push.deleteMissing':
     'This branch does not exist on `{remote}`: there is nothing to delete. `git branch -r` shows the known remote branches.',
+  'push.protectedPullRequest':
+    'Rejected by GitHub: `{branch}` is a protected branch that only accepts pull requests. Push your work to another branch (`git checkout -b feature/my-change`, then `git push -u {remote} feature/my-change`) and open a pull request.',
+  'push.protectedForce':
+    'Rejected by GitHub: the history of a protected branch cannot be rewritten. A forced push could erase work the team already merged.',
+  'push.protectedDelete':
+    'Rejected by GitHub: a protected branch cannot be deleted. Its protection rule must be removed in the repository settings first.',
+  'push.protectedStatusCheck':
+    'Rejected by GitHub: `{branch}` requires CI to pass on every commit before accepting it. Go through a branch and a pull request: CI will run on it.',
 
   'shell.help': 'These are the commands of the simulated terminal. Git commands start with `git`.',
   'shell.gitUsage': 'The Git commands available in Agitz.',

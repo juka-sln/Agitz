@@ -193,6 +193,14 @@ export const fr = {
     'Refusé : le tag existe déjà sur le dépôt distant avec un autre commit. Un tag publié ne doit pas bouger.',
   'push.deleteMissing':
     'Cette branche n’existe pas sur `{remote}` : il n’y a rien à supprimer. `git branch -r` montre les branches distantes connues.',
+  'push.protectedPullRequest':
+    'Refusé par GitHub : `{branch}` est une branche protégée qui n’accepte que des pull requests. Pousse ton travail sur une autre branche (`git checkout -b feature/ma-modif`, puis `git push -u {remote} feature/ma-modif`) et ouvre une pull request.',
+  'push.protectedForce':
+    'Refusé par GitHub : on ne réécrit pas l’historique d’une branche protégée. Le push forcé pourrait effacer le travail déjà fusionné par l’équipe.',
+  'push.protectedDelete':
+    'Refusé par GitHub : une branche protégée ne peut pas être supprimée. Il faut d’abord retirer sa règle de protection dans les réglages du dépôt.',
+  'push.protectedStatusCheck':
+    'Refusé par GitHub : `{branch}` exige que la CI ait validé chaque commit avant de l’accepter. Passe par une branche et une pull request : la CI s’exécutera dessus.',
 
   'shell.help': 'Voici les commandes du terminal simulé. Les commandes Git commencent par `git`.',
   'shell.gitUsage': 'Liste des commandes Git disponibles dans Agitz.',
