@@ -22,6 +22,7 @@ import { branchingStrategyGuide } from './guides/branchingStrategy';
 import { codeReviewGuide } from './guides/codeReview';
 import { commitMessagesGuide } from './guides/commitMessages';
 import { githubCollaborationGuide } from './guides/githubCollaboration';
+import { githubPlatformGuide } from './guides/githubPlatform';
 import { gitignoreGuide } from './guides/gitignore';
 import { mergeVsRebaseGuide } from './guides/mergeVsRebase';
 import { semverGuide } from './guides/semver';
@@ -66,6 +67,7 @@ export const GUIDE_DOCS: readonly GuideDoc[] = [
   semverGuide,
   codeReviewGuide,
   githubCollaborationGuide,
+  githubPlatformGuide,
 ];
 
 export const ALL_DOCS: readonly Doc[] = [...COMMAND_DOCS, ...GUIDE_DOCS];

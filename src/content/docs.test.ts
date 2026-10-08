@@ -63,6 +63,7 @@ describe('documentation catalog', () => {
         'semver',
         'code-review',
         'github-collaboration',
+        'github-platform',
       ]),
     );
   });

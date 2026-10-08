@@ -3,7 +3,7 @@ import type { GuideDoc } from '../model';
 export const githubCollaborationGuide: GuideDoc = {
   kind: 'guide',
   id: 'github-collaboration',
-  related: ['code-review', 'merge-vs-rebase', 'remote', 'push'],
+  related: ['code-review', 'merge-vs-rebase', 'remote', 'push', 'github-platform'],
   text: {
     fr: {
       title: 'Collaborer sur GitHub : fork, pull request, protection',
