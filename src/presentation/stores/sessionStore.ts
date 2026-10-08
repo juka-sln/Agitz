@@ -9,6 +9,7 @@ import {
   type HostingState,
 } from '@/application/github-features/HostingState';
 import { runWorkflows } from '@/application/github-features/runWorkflows';
+import type { ScriptStep } from '@/application/simulation/conflictScenario';
 import type { TeamSetup } from '@/application/simulation/teamSetup';
 import type { GitHub } from '@/domain/entities/GitHub';
 import type { Network } from '@/domain/entities/Network';
@@ -80,6 +81,10 @@ export interface SessionState {
   readonly act: (
     perform: (actions: GitHubActions, state: HostingState) => HostingState,
   ) => GitHubProblem | null;
+  /** Starts over with the initial team, empty workstations and repositories. */
+  readonly reset: () => void;
+  /** Types each command in the terminal of its teammate, switching workstation as needed. */
+  readonly play: (steps: readonly ScriptStep[]) => void;
 }
 
 export type SessionStore = ReturnType<typeof createSessionStore>;
@@ -222,6 +227,19 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
       }
       set({ network: result.state.network, github: result.state.github });
       return null;
+    },
+
+    reset() {
+      set(initialState());
+    },
+
+    play(steps) {
+      steps.forEach(({ userId, commandLine }) => {
+        if (get().activeUser.id !== userId) {
+          get().switchUser(userId);
+        }
+        get().run(commandLine);
+      });
     },
   }));
 }
