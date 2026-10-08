@@ -13,12 +13,14 @@ import type { MessageKey } from '../../i18n/messages';
 import { tabOf, useGitHubStore, type GitHubTab } from '../../stores/githubStore';
 
 import { CodeTab } from './CodeTab';
+import { IssuesTab } from './IssuesTab';
 import { PullRequestsTab } from './PullRequestsTab';
 import { Button, ProblemAlert } from './ui';
 
 const TABS: readonly { readonly tab: GitHubTab; readonly label: MessageKey }[] = [
   { tab: 'code', label: 'github.tab.code' },
   { tab: 'pulls', label: 'github.tab.pulls' },
+  { tab: 'issues', label: 'github.tab.issues' },
 ];
 
 function ForkButton({ project }: { readonly project: HostedProject }) {
@@ -133,6 +135,7 @@ export function RepositoryPage({
       <div className="pt-4">
         {currentTab === 'code' && <CodeTab project={project} />}
         {currentTab === 'pulls' && <PullRequestsTab project={project} view={view} />}
+        {currentTab === 'issues' && <IssuesTab project={project} view={view} />}
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ export const GITHUB_FR = {
   'github.repositoryNavigation': 'Navigation du dépôt',
   'github.tab.code': 'Code',
   'github.tab.pulls': 'Pull requests',
+  'github.tab.issues': 'Issues',
 
   'github.cloneTitle': 'Cloner ce dépôt',
   'github.upstreamHint':
@@ -168,6 +169,20 @@ export const GITHUB_FR = {
     'La fusion a eu lieu sur GitHub : les dépôts locaux ne la voient pas encore. Récupère-la sur `{base}` :',
   'github.merged.deleteHint': 'La branche a fait son travail : tu peux la supprimer sur GitHub.',
 
+  'github.issues.intro': 'Les issues décrivent un bug ou une idée, avant d’écrire du code.',
+  'github.issues.new': 'Nouvelle issue',
+  'github.issues.empty': 'Aucune issue.',
+  'github.issues.titleLabel': 'Titre',
+  'github.issues.bodyLabel': 'Description',
+  'github.issues.labels': 'Labels',
+  'github.issues.submit': 'Créer l’issue',
+  'github.issues.openedBy': 'ouverte par {author}',
+  'github.issues.closedBy': 'Fermée automatiquement par la fusion de la pull request #{number}.',
+  'github.issues.closingHint':
+    'Écris `Closes #{number}` dans la description d’une pull request : sa fusion fermera cette issue.',
+  'github.issues.close': 'Fermer l’issue',
+  'github.issues.reopen': 'Rouvrir l’issue',
+
   'github.problem.repositoryNotFound': 'Ce dépôt n’existe pas.',
   'github.problem.notOwner': 'Seul le propriétaire ({owner}) peut faire cela.',
   'github.problem.invalidRepositoryName':
@@ -227,6 +242,7 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
   'github.repositoryNavigation': 'Repository navigation',
   'github.tab.code': 'Code',
   'github.tab.pulls': 'Pull requests',
+  'github.tab.issues': 'Issues',
 
   'github.cloneTitle': 'Clone this repository',
   'github.upstreamHint':
@@ -369,6 +385,20 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
   'github.merged.pullHint':
     'The merge happened on GitHub: local repositories do not see it yet. Get it on `{base}`:',
   'github.merged.deleteHint': 'The branch did its job: you can delete it on GitHub.',
+
+  'github.issues.intro': 'Issues describe a bug or an idea, before anyone writes code.',
+  'github.issues.new': 'New issue',
+  'github.issues.empty': 'No issues.',
+  'github.issues.titleLabel': 'Title',
+  'github.issues.bodyLabel': 'Description',
+  'github.issues.labels': 'Labels',
+  'github.issues.submit': 'Submit new issue',
+  'github.issues.openedBy': 'opened by {author}',
+  'github.issues.closedBy': 'Closed automatically when pull request #{number} was merged.',
+  'github.issues.closingHint':
+    'Write `Closes #{number}` in a pull request description: merging it will close this issue.',
+  'github.issues.close': 'Close issue',
+  'github.issues.reopen': 'Reopen issue',
 
   'github.problem.repositoryNotFound': 'This repository does not exist.',
   'github.problem.notOwner': 'Only the owner ({owner}) can do that.',

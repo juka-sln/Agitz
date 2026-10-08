@@ -127,4 +127,24 @@ describe('GitHubPanel', () => {
     expect(panel().getByText(/« wip » ne suit pas Conventional Commits/)).toBeInTheDocument();
     expect(panel().getByRole('button', { name: 'Fusionner la pull request' })).toBeDisabled();
   });
+
+  it('opens an issue that a merged pull request closes', async () => {
+    const user = userEvent.setup();
+    const store = renderGitHub();
+    await openProject(user);
+    await user.click(panel().getByRole('button', { name: 'Issues' }));
+    await user.click(panel().getByRole('button', { name: 'Nouvelle issue' }));
+    await user.type(panel().getByRole('textbox', { name: 'Titre' }), 'Greet visitors');
+    await user.click(panel().getByRole('checkbox', { name: 'enhancement' }));
+    await user.click(panel().getByRole('button', { name: 'Créer l’issue' }));
+
+    expect(
+      panel().getByRole('heading', { level: 3, name: 'Greet visitors #1' }),
+    ).toBeInTheDocument();
+    expect(panel().getByText(/`?Closes #1`?/)).toBeInTheDocument();
+    expect(store.getState().github.issues[0]).toMatchObject({ labels: ['enhancement'] });
+
+    await user.click(panel().getByRole('button', { name: 'Fermer l’issue' }));
+    expect(store.getState().github.issues[0]?.state).toBe('closed');
+  });
 });
