@@ -24,6 +24,7 @@ export const GITHUB_FR = {
   'github.tab.code': 'Code',
   'github.tab.pulls': 'Pull requests',
   'github.tab.issues': 'Issues',
+  'github.tab.actions': 'Actions',
 
   'github.cloneTitle': 'Cloner ce dépôt',
   'github.upstreamHint':
@@ -183,6 +184,13 @@ export const GITHUB_FR = {
   'github.issues.close': 'Fermer l’issue',
   'github.issues.reopen': 'Rouvrir l’issue',
 
+  'github.actions.intro':
+    'GitHub Actions lance un workflow à chaque push. Ici, la CI vérifie les messages des commits (`commitlint`) et l’absence de marqueurs de conflit (`build`).',
+  'github.actions.empty':
+    'Aucun workflow n’a tourné. GitHub n’exécute que les workflows déclarés dans `.github/workflows/` : ajoute ce fichier à ton dépôt et pousse-le.',
+  'github.actions.run': 'Exécution n°{id}',
+  'github.actions.trigger': 'push sur {branch} ({commit})',
+
   'github.problem.repositoryNotFound': 'Ce dépôt n’existe pas.',
   'github.problem.notOwner': 'Seul le propriétaire ({owner}) peut faire cela.',
   'github.problem.invalidRepositoryName':
@@ -243,6 +251,7 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
   'github.tab.code': 'Code',
   'github.tab.pulls': 'Pull requests',
   'github.tab.issues': 'Issues',
+  'github.tab.actions': 'Actions',
 
   'github.cloneTitle': 'Clone this repository',
   'github.upstreamHint':
@@ -399,6 +408,13 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
     'Write `Closes #{number}` in a pull request description: merging it will close this issue.',
   'github.issues.close': 'Close issue',
   'github.issues.reopen': 'Reopen issue',
+
+  'github.actions.intro':
+    'GitHub Actions runs a workflow on every push. Here, CI checks commit messages (`commitlint`) and that no conflict markers are left (`build`).',
+  'github.actions.empty':
+    'No workflow ran yet. GitHub only runs workflows declared in `.github/workflows/`: add this file to your repository and push it.',
+  'github.actions.run': 'Run #{id}',
+  'github.actions.trigger': 'push to {branch} ({commit})',
 
   'github.problem.repositoryNotFound': 'This repository does not exist.',
   'github.problem.notOwner': 'Only the owner ({owner}) can do that.',

@@ -147,4 +147,16 @@ describe('GitHubPanel', () => {
     await user.click(panel().getByRole('button', { name: 'Fermer l’issue' }));
     expect(store.getState().github.issues[0]?.state).toBe('closed');
   });
+
+  it('lists the CI runs triggered by pushes', async () => {
+    const user = userEvent.setup();
+    renderGitHub();
+    await openProject(user);
+    await user.click(panel().getByRole('button', { name: 'Actions' }));
+
+    expect(panel().getByRole('heading', { level: 3, name: 'Exécution n°1' })).toBeInTheDocument();
+    expect(panel().getByText(/push sur main/)).toBeInTheDocument();
+    expect(panel().getByText('vérifie les messages des nouveaux commits')).toBeInTheDocument();
+    expect(panel().getByText('construit le projet')).toBeInTheDocument();
+  });
 });
