@@ -4,12 +4,11 @@ import { findDoc } from '@/content/docs';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { selectCurrentPage, useDocsStore } from '../../stores/docsStore';
+import { DOCS_PANEL_ID } from '../layout/panelIds';
 
 import { CommandDocPage } from './CommandDocPage';
 import { DocsIndex } from './DocsIndex';
 import { GuideDocPage } from './GuideDocPage';
-
-export const DOCS_PANEL_ID = 'docs-panel';
 
 const toolbarButtonClass =
   'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';

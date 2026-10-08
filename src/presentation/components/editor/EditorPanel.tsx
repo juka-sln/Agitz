@@ -5,12 +5,11 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useConflictResolution } from '../../hooks/useWorkspaceViews';
 import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
+import { EDITOR_PANEL_ID } from '../layout/panelIds';
 
 import { ConflictOverview } from './ConflictOverview';
 import { FileEditor } from './FileEditor';
 import { ScenarioCard } from './ScenarioCard';
-
-export const EDITOR_PANEL_ID = 'editor-panel';
 
 const toolbarButtonClass =
   'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';

@@ -4,9 +4,8 @@ import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
 import { useGitHubStore } from '../../stores/githubStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
-import { DOCS_PANEL_ID } from '../docs/DocsPanel';
-import { EDITOR_PANEL_ID } from '../editor/EditorPanel';
-import { GITHUB_PANEL_ID } from '../github/GitHubPanel';
+
+import { DOCS_PANEL_ID, EDITOR_PANEL_ID, GITHUB_PANEL_ID } from './panelIds';
 
 /** Two transit lines forking at a station: the branch in its simplest form. */
 function LogoMark() {
