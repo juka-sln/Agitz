@@ -16,6 +16,7 @@ import { ActionsTab } from './ActionsTab';
 import { CodeTab } from './CodeTab';
 import { IssuesTab } from './IssuesTab';
 import { PullRequestsTab } from './PullRequestsTab';
+import { SettingsTab } from './SettingsTab';
 import { Button, ProblemAlert } from './ui';
 
 const TABS: readonly { readonly tab: GitHubTab; readonly label: MessageKey }[] = [
@@ -23,6 +24,7 @@ const TABS: readonly { readonly tab: GitHubTab; readonly label: MessageKey }[] =
   { tab: 'pulls', label: 'github.tab.pulls' },
   { tab: 'issues', label: 'github.tab.issues' },
   { tab: 'actions', label: 'github.tab.actions' },
+  { tab: 'settings', label: 'github.tab.settings' },
 ];
 
 function ForkButton({ project }: { readonly project: HostedProject }) {
@@ -139,6 +141,7 @@ export function RepositoryPage({
         {currentTab === 'pulls' && <PullRequestsTab project={project} view={view} />}
         {currentTab === 'issues' && <IssuesTab project={project} view={view} />}
         {currentTab === 'actions' && <ActionsTab project={project} />}
+        {currentTab === 'settings' && <SettingsTab project={project} />}
       </div>
     </div>
   );

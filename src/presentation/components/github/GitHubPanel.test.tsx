@@ -68,6 +68,24 @@ describe('GitHubPanel', () => {
     expect(branches).toHaveTextContent(/main.*par défaut.*CI réussie.*feat: initial commit/);
   });
 
+  it('lets only the owner protect a branch', async () => {
+    const user = userEvent.setup();
+    const store = renderGitHub();
+    await openProject(user);
+    await user.click(panel().getByRole('button', { name: 'Réglages' }));
+    await user.click(panel().getByRole('button', { name: 'Protéger main' }));
+
+    expect(panel().getByRole('checkbox', { name: /Exiger une pull request/ })).toBeChecked();
+    expect(store.getState().network.protections).toHaveProperty(
+      ['https://github.com/alice/project.git', 'main', 'requiredApprovals'],
+      1,
+    );
+
+    store.getState().switchUser('bob');
+    expect(await panel().findByText(/Seul le propriétaire \(alice\)/)).toBeInTheDocument();
+    expect(panel().getByRole('button', { name: 'Retirer la protection main' })).toBeDisabled();
+  });
+
   it('opens, reviews and merges a pull request', async () => {
     const user = userEvent.setup();
     const store = createTestSessionStore(PUBLISH);

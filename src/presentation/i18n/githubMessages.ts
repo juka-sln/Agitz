@@ -25,6 +25,7 @@ export const GITHUB_FR = {
   'github.tab.pulls': 'Pull requests',
   'github.tab.issues': 'Issues',
   'github.tab.actions': 'Actions',
+  'github.tab.settings': 'Réglages',
 
   'github.cloneTitle': 'Cloner ce dépôt',
   'github.upstreamHint':
@@ -191,6 +192,21 @@ export const GITHUB_FR = {
   'github.actions.run': 'Exécution n°{id}',
   'github.actions.trigger': 'push sur {branch} ({commit})',
 
+  'github.settings.intro':
+    'Une **règle de protection** empêche de modifier une branche importante sans contrôle : c’est ce qui oblige l’équipe à passer par des pull requests.',
+  'github.settings.ownerOnly': 'Seul le propriétaire ({owner}) peut modifier ces réglages.',
+  'github.settings.protect': 'Protéger',
+  'github.settings.unprotect': 'Retirer la protection',
+  'github.settings.requirePullRequest': 'Exiger une pull request avant de fusionner',
+  'github.settings.requirePullRequestHint':
+    'Les `git push` directs sur cette branche sont refusés.',
+  'github.settings.requiredApprovals': 'Approbations requises',
+  'github.settings.requireStatusChecks': 'Exiger que la CI passe',
+  'github.settings.requireStatusChecksHint':
+    'La pull request ne peut être fusionnée que si le workflow est vert sur son dernier commit.',
+  'github.settings.alwaysBlocked':
+    'Une branche protégée refuse toujours les push forcés et la suppression.',
+
   'github.problem.repositoryNotFound': 'Ce dépôt n’existe pas.',
   'github.problem.notOwner': 'Seul le propriétaire ({owner}) peut faire cela.',
   'github.problem.invalidRepositoryName':
@@ -252,6 +268,7 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
   'github.tab.pulls': 'Pull requests',
   'github.tab.issues': 'Issues',
   'github.tab.actions': 'Actions',
+  'github.tab.settings': 'Settings',
 
   'github.cloneTitle': 'Clone this repository',
   'github.upstreamHint':
@@ -415,6 +432,19 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
     'No workflow ran yet. GitHub only runs workflows declared in `.github/workflows/`: add this file to your repository and push it.',
   'github.actions.run': 'Run #{id}',
   'github.actions.trigger': 'push to {branch} ({commit})',
+
+  'github.settings.intro':
+    'A **branch protection rule** prevents changing an important branch unchecked: it is what makes the team go through pull requests.',
+  'github.settings.ownerOnly': 'Only the owner ({owner}) can change these settings.',
+  'github.settings.protect': 'Protect',
+  'github.settings.unprotect': 'Remove protection',
+  'github.settings.requirePullRequest': 'Require a pull request before merging',
+  'github.settings.requirePullRequestHint': 'Direct `git push` to this branch is refused.',
+  'github.settings.requiredApprovals': 'Required approvals',
+  'github.settings.requireStatusChecks': 'Require status checks to pass',
+  'github.settings.requireStatusChecksHint':
+    'A pull request can only be merged when the workflow passed on its last commit.',
+  'github.settings.alwaysBlocked': 'A protected branch always refuses forced pushes and deletion.',
 
   'github.problem.repositoryNotFound': 'This repository does not exist.',
   'github.problem.notOwner': 'Only the owner ({owner}) can do that.',
