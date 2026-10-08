@@ -4,6 +4,7 @@ import { findDocIdForCommandLine } from '@/content/docs';
 import { hasUnmergedPaths } from '@/domain/entities/Repository';
 
 import { useFirstSteps } from '../../hooks/useFirstSteps';
+import { describePrompt } from '../../hooks/usePrompt';
 import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
@@ -122,7 +123,7 @@ export function Terminal() {
           return (
             <div key={entry.id} className="group mb-1">
               <div className="flex flex-wrap items-start">
-                <Prompt workspace={entry.workspaceBefore} />
+                <Prompt parts={entry.prompt} />
                 <span className="break-all whitespace-pre-wrap">{entry.commandLine}</span>
                 {docId !== null && !isLatest && (
                   // Kept out of the tab order so the log does not fill up with stops;
@@ -174,7 +175,7 @@ export function Terminal() {
           {t('terminal.keyboardHelp')}
         </p>
         <div className="flex">
-          <Prompt workspace={workspace} />
+          <Prompt parts={describePrompt(workspace)} />
           <input
             ref={inputRef}
             value={input}

@@ -30,10 +30,12 @@ import {
 import type { Completion } from '@/infrastructure/shell/completion';
 import type { Shell } from '@/infrastructure/shell/Shell';
 
+import { describePrompt, type PromptParts } from '../hooks/usePrompt';
+
 export interface TerminalEntry {
   readonly id: number;
-  /** The workspace as it was when the command was typed, to render its prompt. */
-  readonly workspaceBefore: Workspace;
+  /** The prompt as it was when the command was typed. */
+  readonly prompt: PromptParts;
   readonly commandLine: string;
   readonly output: string;
   readonly exitCode: number;
@@ -152,7 +154,7 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
           : runWorkflows({ network: result.network, github }, network);
       const entry: TerminalEntry = {
         id: nextId,
-        workspaceBefore: workspace,
+        prompt: describePrompt(workspace),
         commandLine: trimmed,
         output: result.output,
         exitCode: result.exitCode,

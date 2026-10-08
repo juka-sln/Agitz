@@ -8,7 +8,7 @@ describe('sessionStore', () => {
     const { entries, workspace, lastResult } = store.getState();
 
     expect(entries.map((entry) => entry.commandLine)).toEqual(['git init', 'echo hi > a.txt']);
-    expect(entries[0]?.workspaceBefore.repository).toBeNull();
+    expect(entries[0]?.prompt.location).toBeNull();
     expect(workspace.files).toEqual({ 'a.txt': 'hi\n' });
     expect(lastResult?.diffState.workingTreeChanged).toBe(true);
   });
