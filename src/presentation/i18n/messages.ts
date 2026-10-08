@@ -1,5 +1,6 @@
 import type { Language } from '@/shared/language';
 
+import { EDITOR_EN, EDITOR_FR } from './editorMessages';
 import { GITHUB_EN, GITHUB_FR } from './githubMessages';
 
 export type { Language } from '@/shared/language';
@@ -98,6 +99,7 @@ const fr = {
   'terminal.learnMoreTarget': 'sur {command}',
 
   ...GITHUB_FR,
+  ...EDITOR_FR,
 } as const;
 
 export type MessageKey = keyof typeof fr;
@@ -196,6 +198,7 @@ const en: Record<MessageKey, string> = {
   'terminal.learnMoreTarget': 'about {command}',
 
   ...GITHUB_EN,
+  ...EDITOR_EN,
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = { fr, en };

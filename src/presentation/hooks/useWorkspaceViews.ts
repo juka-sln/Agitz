@@ -2,6 +2,10 @@ import { useMemo } from 'react';
 
 import { getCommitGraph, type CommitGraph } from '@/application/queries/getCommitGraph';
 import {
+  getConflictResolution,
+  type ConflictResolution,
+} from '@/application/queries/getConflictResolution';
+import {
   getWorkingTreeEntries,
   type WorkingTreeEntry,
 } from '@/application/queries/getWorkingTreeEntries';
@@ -25,4 +29,9 @@ export function useWorkingTreeEntries(): {
     }),
     [workspace],
   );
+}
+
+export function useConflictResolution(): ConflictResolution | null {
+  const workspace = useSession((state) => state.workspace);
+  return useMemo(() => getConflictResolution(workspace), [workspace]);
 }

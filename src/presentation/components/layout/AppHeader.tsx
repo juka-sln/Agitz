@@ -1,8 +1,11 @@
 import { useTranslation } from '../../hooks/useTranslation';
+import { useConflictResolution } from '../../hooks/useWorkspaceViews';
 import { useDocsStore } from '../../stores/docsStore';
+import { useEditorStore } from '../../stores/editorStore';
 import { useGitHubStore } from '../../stores/githubStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
 import { DOCS_PANEL_ID } from '../docs/DocsPanel';
+import { EDITOR_PANEL_ID } from '../editor/EditorPanel';
 import { GITHUB_PANEL_ID } from '../github/GitHubPanel';
 
 /** Two transit lines forking at a station: the branch in its simplest form. */
@@ -95,6 +98,20 @@ function PullRequestIcon() {
   );
 }
 
+function PencilIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const buttonClass =
   'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-surface-raised hover:text-ink';
 
@@ -107,6 +124,9 @@ export function AppHeader() {
   const toggleDocs = useDocsStore((state) => state.toggle);
   const isGitHubOpen = useGitHubStore((state) => state.isOpen);
   const toggleGitHub = useGitHubStore((state) => state.toggle);
+  const isEditorOpen = useEditorStore((state) => state.isOpen);
+  const toggleEditor = useEditorStore((state) => state.toggle);
+  const conflictCount = useConflictResolution()?.files.length ?? 0;
 
   return (
     <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-4">
@@ -115,6 +135,22 @@ export function AppHeader() {
         <h1 className="text-ink text-lg font-bold tracking-tight">Agitz</h1>
       </div>
       <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className={`${buttonClass} gap-1.5`}
+          onClick={toggleEditor}
+          aria-expanded={isEditorOpen}
+          aria-controls={isEditorOpen ? EDITOR_PANEL_ID : undefined}
+        >
+          <PencilIcon />
+          <span className="sr-only sm:not-sr-only">{t('header.editor')}</span>
+          {conflictCount > 0 && (
+            <span className="bg-status-deleted text-canvas rounded-full px-1.5 text-xs font-bold">
+              <span aria-hidden="true">{conflictCount}</span>
+              <span className="sr-only">{t('header.conflicts', { count: conflictCount })}</span>
+            </span>
+          )}
+        </button>
         <button
           type="button"
           className={`${buttonClass} gap-1.5`}

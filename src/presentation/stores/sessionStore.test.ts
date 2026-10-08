@@ -1,3 +1,5 @@
+import { createConflictScenario } from '@/application/simulation/conflictScenario';
+import { SHARED_REPOSITORY_URL } from '@/application/simulation/teamSetup';
 import { createTestSessionStore } from '@/test/fixtures/createTestSessionStore';
 
 describe('sessionStore', () => {
@@ -123,6 +125,73 @@ describe('sessionStore', () => {
         'https://github.com/alice/project.git',
         'https://github.com/bob/project.git',
       ]);
+    });
+  });
+
+  describe('as a text editor', () => {
+    it('saves files on the active workstation', () => {
+      const store = createTestSessionStore(['git init']);
+
+      expect(store.getState().saveFile('docs/notes.md', 'hello\n')).toBeNull();
+      expect(store.getState().workspace.files).toEqual({ 'docs/notes.md': 'hello\n' });
+    });
+
+    it('refuses paths that cannot hold a file', () => {
+      const store = createTestSessionStore(['echo hi > docs/notes.md']);
+      const { saveFile } = store.getState();
+
+      expect(saveFile('../outside.txt', '')).toBe('invalidPath');
+      expect(saveFile('docs', '')).toBe('isDirectory');
+      expect(saveFile('docs/notes.md/more.txt', '')).toBe('parentIsFile');
+      expect(store.getState().workspace.files).toEqual({ 'docs/notes.md': 'hi\n' });
+    });
+  });
+
+  describe('with scripted scenarios', () => {
+    it('plays the conflict scenario up to the conflicting merge', () => {
+      const store = createTestSessionStore();
+      const { users, play } = store.getState();
+      const [alice, bob] = users;
+      if (alice === undefined || bob === undefined) {
+        throw new Error('The default team has two users');
+      }
+
+      play(createConflictScenario(alice, bob, SHARED_REPOSITORY_URL));
+      const state = store.getState();
+
+      expect(state.activeUser.id).toBe('alice');
+      expect(state.entries.slice(0, -1).filter((entry) => entry.exitCode !== 0)).toEqual([]);
+      expect(state.entries.at(-1)?.output).toContain(
+        'CONFLICT (content): Merge conflict in README.md',
+      );
+      expect(state.otherWorkstations.bob?.entries.length).toBeGreaterThan(0);
+      expect(state.workspace.files['README.md']).toBe(
+        [
+          '# Bakery',
+          'Fresh bread every morning.',
+          '<<<<<<< HEAD',
+          'Open from 7am to 7pm, closed on Sundays.',
+          '=======',
+          'Open every day from 6am to 8pm.',
+          '>>>>>>> origin/docs/opening-hours',
+          '',
+        ].join('\n'),
+      );
+    });
+
+    it('starts over from the initial team', () => {
+      const store = createTestSessionStore(['git init', 'echo hi > a.txt']);
+      store.getState().addUser('Carol');
+      store.getState().switchUser('bob');
+
+      store.getState().reset();
+      const state = store.getState();
+
+      expect(state.activeUser.id).toBe('alice');
+      expect(state.users.map((user) => user.id)).toEqual(['alice', 'bob']);
+      expect(state.workspace.repository).toBeNull();
+      expect(state.entries).toEqual([]);
+      expect(state.showWelcome).toBe(true);
     });
   });
 });

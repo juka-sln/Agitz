@@ -1,18 +1,21 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { createTestSessionStore } from '@/test/fixtures/createTestSessionStore';
+
 import { useDocsStore } from '../../stores/docsStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
+import { SessionProvider } from '../../stores/SessionProvider';
 import { AppHeader } from '../layout/AppHeader';
 
 import { DocsPanel } from './DocsPanel';
 
 function renderPanel() {
   render(
-    <>
+    <SessionProvider store={createTestSessionStore()}>
       <AppHeader />
       <DocsPanel />
-    </>,
+    </SessionProvider>,
   );
   return { toggle: screen.getByRole('button', { name: 'Documentation' }) };
 }

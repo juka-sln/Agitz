@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
 import { findDocIdForCommandLine } from '@/content/docs';
+import { hasUnmergedPaths } from '@/domain/entities/Repository';
 
 import { useFirstSteps } from '../../hooks/useFirstSteps';
 import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
+import { useEditorStore } from '../../stores/editorStore';
 import { docTitle } from '../docs/docTitle';
 
 import { completeInput } from './completeInput';
@@ -25,6 +27,8 @@ export function Terminal() {
   const complete = useSession((state) => state.complete);
   const clear = useSession((state) => state.clear);
   const openDocs = useDocsStore((state) => state.open);
+  const openEditor = useEditorStore((state) => state.open);
+  const hasConflicts = workspace.repository !== null && hasUnmergedPaths(workspace.repository);
 
   const [input, setInput] = useState('');
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
@@ -146,6 +150,17 @@ export function Terminal() {
                   docId={docId}
                   onLearnMore={openDocs}
                 />
+              )}
+              {isLatest && hasConflicts && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    openEditor(null);
+                  }}
+                  className="border-terminal-warning text-terminal-warning hover:bg-terminal-warning/10 mb-2 rounded border px-2 py-0.5 font-sans text-xs font-semibold"
+                >
+                  {t('terminal.resolveConflicts')}
+                </button>
               )}
             </div>
           );

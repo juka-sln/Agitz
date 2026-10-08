@@ -9,6 +9,7 @@ import {
   type HostingState,
 } from '@/application/github-features/HostingState';
 import { runWorkflows } from '@/application/github-features/runWorkflows';
+import type { ScriptStep } from '@/application/simulation/conflictScenario';
 import type { TeamSetup } from '@/application/simulation/teamSetup';
 import type { GitHub } from '@/domain/entities/GitHub';
 import type { Network } from '@/domain/entities/Network';
@@ -19,7 +20,13 @@ import {
   type SimulatedUser,
   type UserNameProblem,
 } from '@/domain/entities/SimulatedUser';
-import { createWorkspace, type Workspace } from '@/domain/entities/Workspace';
+import {
+  createWorkspace,
+  findFileWriteProblem,
+  writeFile,
+  type FileWriteProblem,
+  type Workspace,
+} from '@/domain/entities/Workspace';
 import type { Completion } from '@/infrastructure/shell/completion';
 import type { Shell } from '@/infrastructure/shell/Shell';
 
@@ -65,6 +72,8 @@ export interface SessionState {
   readonly run: (commandLine: string) => void;
   readonly complete: (commandLine: string) => Completion;
   readonly clear: () => void;
+  /** Writes a file on the active workstation, like a text editor would. */
+  readonly saveFile: (path: string, content: string) => FileWriteProblem | null;
   readonly switchUser: (userId: string) => void;
   /** Creates a teammate with an empty workstation, or tells why the name is refused. */
   readonly addUser: (name: string) => UserNameProblem | null;
@@ -72,6 +81,10 @@ export interface SessionState {
   readonly act: (
     perform: (actions: GitHubActions, state: HostingState) => HostingState,
   ) => GitHubProblem | null;
+  /** Starts over with the initial team, empty workstations and repositories. */
+  readonly reset: () => void;
+  /** Types each command in the terminal of its teammate, switching workstation as needed. */
+  readonly play: (steps: readonly ScriptStep[]) => void;
 }
 
 export type SessionStore = ReturnType<typeof createSessionStore>;
@@ -108,16 +121,19 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
     throw new Error('A session needs at least one user');
   }
   let nextId = 1;
-
-  return createStore<SessionState>()((set, get) => ({
+  const initialState = () => ({
     users: team.users,
     network: team.network,
     github: team.github,
-    gitHubActions,
     otherWorkstations: Object.fromEntries(
       otherUsers.map((user) => [user.id, createWorkstation(user)]),
     ),
     ...flatten(createWorkstation(firstUser)),
+  });
+
+  return createStore<SessionState>()((set, get) => ({
+    ...initialState(),
+    gitHubActions,
 
     run(commandLine) {
       const trimmed = commandLine.trim();
@@ -165,6 +181,15 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
       set({ entries: [], showWelcome: false });
     },
 
+    saveFile(path, content) {
+      const { workspace } = get();
+      const problem = findFileWriteProblem(workspace, path);
+      if (problem === null) {
+        set({ workspace: writeFile(workspace, path, content) });
+      }
+      return problem;
+    },
+
     switchUser(userId) {
       const state = get();
       const target = state.otherWorkstations[userId];
@@ -202,6 +227,19 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
       }
       set({ network: result.state.network, github: result.state.github });
       return null;
+    },
+
+    reset() {
+      set(initialState());
+    },
+
+    play(steps) {
+      steps.forEach(({ userId, commandLine }) => {
+        if (get().activeUser.id !== userId) {
+          get().switchUser(userId);
+        }
+        get().run(commandLine);
+      });
     },
   }));
 }
