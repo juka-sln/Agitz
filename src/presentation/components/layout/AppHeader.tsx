@@ -1,13 +1,17 @@
+import { MISSION_IDS } from '@/application/learning/missions';
+
 import { useTranslation } from '../../hooks/useTranslation';
 import { useConflictResolution } from '../../hooks/useWorkspaceViews';
 import { useDocsStore } from '../../stores/docsStore';
 import { useEditorStore } from '../../stores/editorStore';
 import { useGitHubStore } from '../../stores/githubStore';
+import { useMissionsStore } from '../../stores/missionsStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
+import { selectCompletedMissions, useProgressStore } from '../../stores/progressStore';
 import { useShortcutsStore } from '../../stores/shortcutsStore';
 import { ariaKeyShortcut } from '../shortcuts/globalShortcuts';
 
-import { DOCS_PANEL_ID, EDITOR_PANEL_ID, GITHUB_PANEL_ID } from './panelIds';
+import { DOCS_PANEL_ID, EDITOR_PANEL_ID, GITHUB_PANEL_ID, MISSIONS_PANEL_ID } from './panelIds';
 
 /** Two transit lines forking at a station: the branch in its simplest form. */
 function LogoMark() {
@@ -113,6 +117,21 @@ function PencilIcon() {
   );
 }
 
+function FlagIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M5 21V4M5 4h11l-2 4 2 4H5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function KeyboardIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -152,6 +171,9 @@ export function AppHeader() {
   const toggleEditor = useEditorStore((state) => state.toggle);
   const conflictCount = useConflictResolution()?.files.length ?? 0;
   const openShortcuts = useShortcutsStore((state) => state.open);
+  const isMissionsOpen = useMissionsStore((state) => state.isOpen);
+  const toggleMissions = useMissionsStore((state) => state.toggle);
+  const missionsDone = useProgressStore((state) => selectCompletedMissions(state).length);
 
   return (
     <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-4">
@@ -160,6 +182,25 @@ export function AppHeader() {
         <h1 className="text-ink text-lg font-bold tracking-tight">Agitz</h1>
       </div>
       <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className={`${buttonClass} gap-1.5`}
+          onClick={toggleMissions}
+          aria-keyshortcuts={ariaKeyShortcut('toggleMissions')}
+          aria-expanded={isMissionsOpen}
+          aria-controls={isMissionsOpen ? MISSIONS_PANEL_ID : undefined}
+        >
+          <FlagIcon />
+          <span className="sr-only sm:not-sr-only">{t('header.missions')}</span>
+          <span className="bg-surface-raised text-ink rounded-full px-1.5 text-xs font-bold">
+            <span aria-hidden="true">
+              {missionsDone}/{MISSION_IDS.length}
+            </span>
+            <span className="sr-only">
+              {t('header.missionsProgress', { done: missionsDone, total: MISSION_IDS.length })}
+            </span>
+          </span>
+        </button>
         <button
           type="button"
           className={`${buttonClass} gap-1.5`}

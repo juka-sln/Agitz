@@ -2,6 +2,7 @@ import type { Language } from '@/shared/language';
 
 import { EDITOR_EN, EDITOR_FR } from './editorMessages';
 import { GITHUB_EN, GITHUB_FR } from './githubMessages';
+import { MISSIONS_EN, MISSIONS_FR } from './missionsMessages';
 import { SHORTCUTS_EN, SHORTCUTS_FR } from './shortcutsMessages';
 
 export type { Language } from '@/shared/language';
@@ -108,6 +109,7 @@ const fr = {
   ...GITHUB_FR,
   ...EDITOR_FR,
   ...SHORTCUTS_FR,
+  ...MISSIONS_FR,
 } as const;
 
 export type MessageKey = keyof typeof fr;
@@ -214,6 +216,7 @@ const en: Record<MessageKey, string> = {
   ...GITHUB_EN,
   ...EDITOR_EN,
   ...SHORTCUTS_EN,
+  ...MISSIONS_EN,
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = { fr, en };

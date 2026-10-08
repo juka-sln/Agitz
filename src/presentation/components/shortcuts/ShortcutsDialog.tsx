@@ -17,6 +17,7 @@ const PANEL_SHORTCUTS: readonly PanelShortcut[] = [
   'toggleDocs',
   'toggleGitHub',
   'toggleEditor',
+  'toggleMissions',
   'nextUser',
 ];
 

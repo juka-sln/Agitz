@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { FileExplorer } from './components/files/FileExplorer';
 import { CommitGraphView } from './components/graph/CommitGraphView';
 import { AppHeader } from './components/layout/AppHeader';
+import { MissionTracker } from './components/missions/MissionTracker';
 import { GlobalShortcuts } from './components/shortcuts/GlobalShortcuts';
 import { HostedRepositories } from './components/team/HostedRepositories';
 import { RestartSession } from './components/team/RestartSession';
@@ -11,6 +12,7 @@ import { Terminal } from './components/terminal/Terminal';
 import { useDocsStore } from './stores/docsStore';
 import { useEditorStore } from './stores/editorStore';
 import { useGitHubStore } from './stores/githubStore';
+import { useMissionsStore } from './stores/missionsStore';
 import { usePreferencesStore } from './stores/preferencesStore';
 import { SessionProvider } from './stores/SessionProvider';
 import type { SessionStore } from './stores/sessionStore';
@@ -25,16 +27,21 @@ const GitHubPanel = lazy(async () => ({
 const EditorPanel = lazy(async () => ({
   default: (await import('./components/editor/EditorPanel')).EditorPanel,
 }));
+const MissionsPanel = lazy(async () => ({
+  default: (await import('./components/missions/MissionsPanel')).MissionsPanel,
+}));
 
 function SidePanels() {
   const isDocsOpen = useDocsStore((state) => state.isOpen);
   const isGitHubOpen = useGitHubStore((state) => state.isOpen);
   const isEditorOpen = useEditorStore((state) => state.isOpen);
+  const isMissionsOpen = useMissionsStore((state) => state.isOpen);
   return (
     <Suspense fallback={null}>
       {isDocsOpen && <DocsPanel />}
       {isGitHubOpen && <GitHubPanel />}
       {isEditorOpen && <EditorPanel />}
+      {isMissionsOpen && <MissionsPanel />}
     </Suspense>
   );
 }
@@ -60,10 +67,15 @@ interface SidePanelStore {
   ) => () => void;
 }
 
-/** The documentation, GitHub and the editor share the right side: opening one closes the others. */
+/** The side panels share the right side: opening one closes the others. */
 function useExclusiveSidePanels() {
   useEffect(() => {
-    const panels: readonly SidePanelStore[] = [useDocsStore, useGitHubStore, useEditorStore];
+    const panels: readonly SidePanelStore[] = [
+      useDocsStore,
+      useGitHubStore,
+      useEditorStore,
+      useMissionsStore,
+    ];
     const stops = panels.map((panel) =>
       panel.subscribe((state, previous) => {
         if (state.isOpen && !previous.isOpen) {
@@ -90,6 +102,7 @@ export function App({ store }: { store: SessionStore }) {
   return (
     <SessionProvider store={store}>
       <GlobalShortcuts />
+      <MissionTracker />
       <div className="bg-canvas text-ink grid h-full grid-rows-[auto_1fr]">
         <AppHeader />
         <div className="grid min-h-0 grid-cols-1 md:grid-cols-[15rem_1fr]">
