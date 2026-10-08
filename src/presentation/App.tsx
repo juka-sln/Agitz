@@ -2,11 +2,14 @@ import { useEffect } from 'react';
 
 import { DocsPanel } from './components/docs/DocsPanel';
 import { FileExplorer } from './components/files/FileExplorer';
+import { GitHubPanel } from './components/github/GitHubPanel';
 import { CommitGraphView } from './components/graph/CommitGraphView';
 import { AppHeader } from './components/layout/AppHeader';
 import { HostedRepositories } from './components/team/HostedRepositories';
 import { UserSwitcher } from './components/team/UserSwitcher';
 import { Terminal } from './components/terminal/Terminal';
+import { useDocsStore } from './stores/docsStore';
+import { useGitHubStore } from './stores/githubStore';
 import { usePreferencesStore } from './stores/preferencesStore';
 import { SessionProvider } from './stores/SessionProvider';
 import type { SessionStore } from './stores/sessionStore';
@@ -20,8 +23,29 @@ function useDocumentPreferences() {
   }, [theme, language]);
 }
 
+/** The documentation and GitHub share the right side: opening one closes the other. */
+function useExclusiveSidePanels() {
+  useEffect(() => {
+    const stopDocs = useDocsStore.subscribe((state, previous) => {
+      if (state.isOpen && !previous.isOpen) {
+        useGitHubStore.getState().close();
+      }
+    });
+    const stopGitHub = useGitHubStore.subscribe((state, previous) => {
+      if (state.isOpen && !previous.isOpen) {
+        useDocsStore.getState().close();
+      }
+    });
+    return () => {
+      stopDocs();
+      stopGitHub();
+    };
+  }, []);
+}
+
 export function App({ store }: { store: SessionStore }) {
   useDocumentPreferences();
+  useExclusiveSidePanels();
 
   return (
     <SessionProvider store={store}>
@@ -41,6 +65,7 @@ export function App({ store }: { store: SessionStore }) {
               <Terminal />
             </section>
             <DocsPanel />
+            <GitHubPanel />
           </main>
         </div>
       </div>

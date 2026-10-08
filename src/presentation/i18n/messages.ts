@@ -1,5 +1,7 @@
 import type { Language } from '@/shared/language';
 
+import { GITHUB_EN, GITHUB_FR } from './githubMessages';
+
 export type { Language } from '@/shared/language';
 
 const fr = {
@@ -78,6 +80,7 @@ const fr = {
   'hosted.empty': 'Dépôt vide : personne n’a encore poussé.',
   'hosted.branches': 'Branches sur GitHub',
   'hosted.default': 'branche par défaut',
+  'hosted.open': 'Ouvrir sur GitHub',
 
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Commande',
@@ -93,6 +96,8 @@ const fr = {
   'terminal.learnMore': 'En savoir plus',
   'terminal.learnMoreAbout': 'En savoir plus sur {command}',
   'terminal.learnMoreTarget': 'sur {command}',
+
+  ...GITHUB_FR,
 } as const;
 
 export type MessageKey = keyof typeof fr;
@@ -173,6 +178,7 @@ const en: Record<MessageKey, string> = {
   'hosted.empty': 'Empty repository: nobody pushed yet.',
   'hosted.branches': 'Branches on GitHub',
   'hosted.default': 'default branch',
+  'hosted.open': 'Open on GitHub',
 
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Command',
@@ -188,6 +194,8 @@ const en: Record<MessageKey, string> = {
   'terminal.learnMore': 'Learn more',
   'terminal.learnMoreAbout': 'Learn more about {command}',
   'terminal.learnMoreTarget': 'about {command}',
+
+  ...GITHUB_EN,
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = { fr, en };
