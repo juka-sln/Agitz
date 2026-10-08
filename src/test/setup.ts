@@ -28,3 +28,16 @@ Object.assign(globalThis, {
   ResizeObserver: ResizeObserverStub,
   DOMMatrixReadOnly: DOMMatrixReadOnlyStub,
 });
+
+/* jsdom has no modal dialogs: opening and closing only toggle the `open` attribute. */
+Object.assign(HTMLDialogElement.prototype, {
+  showModal(this: HTMLDialogElement) {
+    this.open = true;
+  },
+  close(this: HTMLDialogElement) {
+    if (this.open) {
+      this.open = false;
+      this.dispatchEvent(new Event('close'));
+    }
+  },
+});
