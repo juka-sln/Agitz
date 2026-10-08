@@ -71,7 +71,7 @@ function ProtectionRule({
             <span>
               {t('github.settings.requirePullRequest')}
               <span className="text-ink-muted block text-xs">
-                {t('github.settings.requirePullRequestHint')}
+                <RichText text={t('github.settings.requirePullRequestHint')} />
               </span>
             </span>
           </label>

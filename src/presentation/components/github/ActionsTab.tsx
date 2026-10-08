@@ -42,7 +42,7 @@ export function ActionsTab({ project }: { readonly project: HostedProject }) {
           {runs.map((run) => (
             <li key={run.id}>
               <Box className="flex flex-col gap-2 p-3">
-                <p className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={run.conclusion === 'success' ? 'success' : 'failure'}>
                     {t(
                       run.conclusion === 'success'
@@ -57,7 +57,7 @@ export function ActionsTab({ project }: { readonly project: HostedProject }) {
                       commit: shortHash(run.commit),
                     })}
                   </span>
-                </p>
+                </div>
                 <WorkflowJobs run={run} />
               </Box>
             </li>
