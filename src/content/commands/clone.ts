@@ -12,7 +12,7 @@ export const cloneDoc: CommandDoc = {
       description: [
         '`git clone <url>` télécharge un dépôt complet : tous les commits, toutes les branches, tous les tags. C’est la façon normale de rejoindre un projet existant.',
         'Le clone est déjà relié à sa source : Git crée un remote nommé **`origin`** qui pointe vers l’URL, une branche de suivi `origin/<branche>` pour chaque branche distante, et une branche locale (souvent `main`) qui **suit** `origin/main`.',
-        'Dans Agitz, chaque utilisateur a son propre poste : clone le dépôt partagé `https://github.com/alice/project.git` depuis un poste vide pour travailler à plusieurs.',
+        'Dans Agitz, chaque coéquipier du panneau **Équipe** a son propre poste : passe sur Bob (ou ajoute quelqu’un) et clone le dépôt partagé `https://github.com/alice/project.git` pour travailler à plusieurs.',
       ],
       options: [
         { syntax: 'git clone <url>', text: 'Clone dans un dossier nommé comme le dépôt.' },
@@ -40,7 +40,7 @@ export const cloneDoc: CommandDoc = {
       description: [
         '`git clone <url>` downloads a complete repository: every commit, every branch, every tag. It is the usual way to join an existing project.',
         'The clone is already linked to its source: Git creates a remote named **`origin`** pointing to the URL, a remote-tracking branch `origin/<branch>` for each remote branch, and a local branch (often `main`) that **tracks** `origin/main`.',
-        'In Agitz, each user has their own workstation: clone the shared repository `https://github.com/alice/project.git` from an empty workstation to work as a team.',
+        'In Agitz, each teammate of the **Team** panel has their own workstation: switch to Bob (or add someone) and clone the shared repository `https://github.com/alice/project.git` to work as a team.',
       ],
       options: [
         { syntax: 'git clone <url>', text: 'Clones into a folder named after the repository.' },

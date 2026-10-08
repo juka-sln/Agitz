@@ -301,7 +301,7 @@ export const fr = {
   'error.repositoryNotFound':
     'Aucun dépôt n’existe à l’adresse `{url}`. Vérifie l’URL : dans Agitz, le dépôt partagé est https://github.com/alice/project.git.',
   'error.cloneDestinationNotEmpty':
-    'Ce poste contient déjà un projet. Pour cloner, passe sur un autre utilisateur (ou ajoute-en un) dont le poste est vide.',
+    'Ce poste contient déjà un projet. Pour cloner, passe sur un autre coéquipier du panneau Équipe (ou ajoute-en un) dont le poste est vide.',
   'error.remoteRefNotFound':
     'Le dépôt distant n’a pas de branche `{ref}`. `git branch -r` liste celles que tu connais.',
   'error.noPushDestination':

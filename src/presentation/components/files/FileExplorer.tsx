@@ -38,7 +38,7 @@ export function FileExplorer() {
   const rows = buildFileTree(entries);
 
   return (
-    <nav aria-label={t('files.title')} className="flex h-full flex-col">
+    <nav aria-label={t('files.title')} className="flex min-h-40 flex-1 flex-col">
       <h2 className="text-ink px-4 pt-4 pb-2 text-sm font-bold">{t('files.title')}</h2>
       {entries.length === 0 ? (
         <div className="text-ink-muted px-4 text-sm">
@@ -48,7 +48,7 @@ export function FileExplorer() {
           </code>
         </div>
       ) : (
-        <ul className="min-h-0 flex-1 overflow-y-auto pb-4 text-sm">
+        <ul className="pb-4 text-sm">
           {rows.map((row) => (
             <li
               key={row.key}

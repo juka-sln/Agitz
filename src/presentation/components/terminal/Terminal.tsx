@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
 import { findDocIdForCommandLine } from '@/content/docs';
 
+import { useFirstSteps } from '../../hooks/useFirstSteps';
 import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDocsStore } from '../../stores/docsStore';
@@ -12,14 +13,14 @@ import { Prompt } from './Prompt';
 import { TerminalExplanation } from './TerminalExplanation';
 import { TerminalOutput } from './TerminalOutput';
 
-const FIRST_STEPS = ['git init', 'echo "# My project" > README.md', 'git status'];
-
 export function Terminal() {
   const { t, language } = useTranslation();
   const workspace = useSession((state) => state.workspace);
   const entries = useSession((state) => state.entries);
   const commandHistory = useSession((state) => state.commandHistory);
   const showWelcome = useSession((state) => state.showWelcome);
+  const userName = useSession((state) => state.activeUser.identity.name);
+  const firstSteps = useFirstSteps();
   const run = useSession((state) => state.run);
   const complete = useSession((state) => state.complete);
   const clear = useSession((state) => state.clear);
@@ -100,9 +101,14 @@ export function Terminal() {
         {showWelcome && (
           <div className="text-terminal-muted mb-3">
             <p className="text-terminal-ink">{t('terminal.welcome.title')}</p>
-            <p>{t('terminal.welcome.body')}</p>
+            <p>{t('terminal.welcome.user', { user: userName })}</p>
+            <p>
+              {t(
+                firstSteps.joinsByCloning ? 'terminal.welcome.cloneBody' : 'terminal.welcome.body',
+              )}
+            </p>
             <pre className="text-terminal-accent mt-1">
-              {FIRST_STEPS.map((step) => `  ${step}`).join('\n')}
+              {firstSteps.steps.map((step) => `  ${step}`).join('\n')}
             </pre>
           </div>
         )}

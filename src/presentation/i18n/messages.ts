@@ -47,6 +47,7 @@ const fr = {
   'graph.label': 'Graphe des commits',
   'graph.noRepository.title': 'Aucun dépôt Git ici',
   'graph.noRepository.body': 'Tape cette commande dans le terminal pour en créer un :',
+  'graph.noRepository.cloneBody': 'Rejoins le projet de l’équipe en clonant le dépôt partagé :',
   'graph.noCommits.title': 'Dépôt prêt, aucun commit',
   'graph.noCommits.body': 'Crée un fichier, ajoute-le à l’index, puis enregistre-le :',
   'graph.head': 'Tu es ici : HEAD désigne le commit sur lequel tu travailles',
@@ -64,11 +65,28 @@ const fr = {
   'graph.fitView': 'Afficher tout le graphe',
   'graph.minimap': 'Vue d’ensemble du graphe',
 
+  'team.title': 'Équipe',
+  'team.add': 'Ajouter',
+  'team.newUserLabel': 'Prénom du coéquipier',
+  'team.active': 'poste actif',
+  'team.noRepository': 'aucun dépôt',
+  'team.error.empty': 'Donne un prénom à ton coéquipier.',
+  'team.error.tooLong': '{max} caractères au maximum.',
+  'team.error.invalid': 'Le prénom doit commencer par une lettre.',
+  'team.error.taken': 'Ce coéquipier existe déjà.',
+
+  'hosted.empty': 'Dépôt vide : personne n’a encore poussé.',
+  'hosted.branches': 'Branches sur GitHub',
+  'hosted.default': 'branche par défaut',
+
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Commande',
   'terminal.welcome.title': 'Bienvenue dans Agitz.',
   'terminal.welcome.body':
     'Ce terminal simule un vrai shell avec Git. Tape help pour voir les commandes, ou commence par :',
+  'terminal.welcome.user':
+    'Tu es sur le poste de {user}. Change de coéquipier dans le panneau Équipe pour travailler à plusieurs.',
+  'terminal.welcome.cloneBody': 'Rejoins le projet partagé sur GitHub :',
   'terminal.completions': 'Suggestions :',
   'terminal.keyboardHelp':
     'Entrée exécute la commande, flèches haut et bas pour l’historique, Tab complète une commande commencée, F1 ouvre la documentation de la commande, Échap quitte le terminal.',
@@ -124,6 +142,7 @@ const en: Record<MessageKey, string> = {
   'graph.label': 'Commit graph',
   'graph.noRepository.title': 'No Git repository here',
   'graph.noRepository.body': 'Type this command in the terminal to create one:',
+  'graph.noRepository.cloneBody': 'Join the team’s project by cloning the shared repository:',
   'graph.noCommits.title': 'Repository ready, no commits yet',
   'graph.noCommits.body': 'Create a file, add it to the index, then record it:',
   'graph.head': 'You are here: HEAD is the commit you are working on',
@@ -141,11 +160,28 @@ const en: Record<MessageKey, string> = {
   'graph.fitView': 'Show the whole graph',
   'graph.minimap': 'Graph overview',
 
+  'team.title': 'Team',
+  'team.add': 'Add',
+  'team.newUserLabel': 'Teammate’s first name',
+  'team.active': 'active workstation',
+  'team.noRepository': 'no repository',
+  'team.error.empty': 'Give your teammate a name.',
+  'team.error.tooLong': '{max} characters at most.',
+  'team.error.invalid': 'The name must start with a letter.',
+  'team.error.taken': 'This teammate already exists.',
+
+  'hosted.empty': 'Empty repository: nobody pushed yet.',
+  'hosted.branches': 'Branches on GitHub',
+  'hosted.default': 'default branch',
+
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Command',
   'terminal.welcome.title': 'Welcome to Agitz.',
   'terminal.welcome.body':
     'This terminal simulates a real shell with Git. Type help to list the commands, or start with:',
+  'terminal.welcome.user':
+    'You are on {user}’s workstation. Switch teammates in the Team panel to work together.',
+  'terminal.welcome.cloneBody': 'Join the shared project on GitHub:',
   'terminal.completions': 'Suggestions:',
   'terminal.keyboardHelp':
     'Enter runs the command, up and down arrows browse history, Tab completes a started command, F1 opens the documentation of the command, Escape leaves the terminal.',

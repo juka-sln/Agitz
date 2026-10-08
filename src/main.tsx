@@ -6,7 +6,7 @@ import '@fontsource/overpass-mono/600.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { createWorkspace } from '@/domain/entities/Workspace';
+import { createDefaultTeam } from '@/application/simulation/teamSetup';
 import { createShell } from '@/infrastructure/shell/Shell';
 import { App } from '@/presentation/App';
 import { createSessionStore } from '@/presentation/stores/sessionStore';
@@ -18,10 +18,7 @@ if (!rootElement) {
   throw new Error('Root element #root not found');
 }
 
-const store = createSessionStore(
-  createShell(),
-  createWorkspace('/home/alice/project', { name: 'Alice', email: 'alice@agitz.dev' }),
-);
+const store = createSessionStore(createShell(), createDefaultTeam());
 
 createRoot(rootElement).render(
   <StrictMode>
