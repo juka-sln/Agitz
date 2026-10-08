@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { DocsPanel } from './components/docs/DocsPanel';
+import { EditorPanel } from './components/editor/EditorPanel';
 import { FileExplorer } from './components/files/FileExplorer';
 import { GitHubPanel } from './components/github/GitHubPanel';
 import { CommitGraphView } from './components/graph/CommitGraphView';
@@ -9,6 +10,7 @@ import { HostedRepositories } from './components/team/HostedRepositories';
 import { UserSwitcher } from './components/team/UserSwitcher';
 import { Terminal } from './components/terminal/Terminal';
 import { useDocsStore } from './stores/docsStore';
+import { useEditorStore } from './stores/editorStore';
 import { useGitHubStore } from './stores/githubStore';
 import { usePreferencesStore } from './stores/preferencesStore';
 import { SessionProvider } from './stores/SessionProvider';
@@ -23,22 +25,37 @@ function useDocumentPreferences() {
   }, [theme, language]);
 }
 
-/** The documentation and GitHub share the right side: opening one closes the other. */
+interface SidePanelState {
+  readonly isOpen: boolean;
+  readonly close: () => void;
+}
+
+interface SidePanelStore {
+  readonly getState: () => SidePanelState;
+  readonly subscribe: (
+    listener: (state: SidePanelState, previous: SidePanelState) => void,
+  ) => () => void;
+}
+
+/** The documentation, GitHub and the editor share the right side: opening one closes the others. */
 function useExclusiveSidePanels() {
   useEffect(() => {
-    const stopDocs = useDocsStore.subscribe((state, previous) => {
-      if (state.isOpen && !previous.isOpen) {
-        useGitHubStore.getState().close();
-      }
-    });
-    const stopGitHub = useGitHubStore.subscribe((state, previous) => {
-      if (state.isOpen && !previous.isOpen) {
-        useDocsStore.getState().close();
-      }
-    });
+    const panels: readonly SidePanelStore[] = [useDocsStore, useGitHubStore, useEditorStore];
+    const stops = panels.map((panel) =>
+      panel.subscribe((state, previous) => {
+        if (state.isOpen && !previous.isOpen) {
+          panels
+            .filter((other) => other !== panel)
+            .forEach((other) => {
+              other.getState().close();
+            });
+        }
+      }),
+    );
     return () => {
-      stopDocs();
-      stopGitHub();
+      stops.forEach((stop) => {
+        stop();
+      });
     };
   }, []);
 }
@@ -66,6 +83,7 @@ export function App({ store }: { store: SessionStore }) {
             </section>
             <DocsPanel />
             <GitHubPanel />
+            <EditorPanel />
           </main>
         </div>
       </div>
