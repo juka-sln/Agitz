@@ -4,6 +4,7 @@ import { findProject, projectFullName } from '@/domain/entities/GitHub';
 
 import { useGitHub } from '../../hooks/useGitHub';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useDocsStore } from '../../stores/docsStore';
 import { useGitHubStore } from '../../stores/githubStore';
 import { Avatar } from '../team/Avatar';
 
@@ -29,6 +30,7 @@ export function GitHubPanel() {
   const view = useGitHubStore((state) => state.view);
   const open = useGitHubStore((state) => state.open);
   const close = useGitHubStore((state) => state.close);
+  const openDocs = useDocsStore((state) => state.open);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -87,6 +89,15 @@ export function GitHubPanel() {
             <span aria-hidden="true">←</span> {t('github.allRepositories')}
           </button>
         )}
+        <button
+          type="button"
+          className={toolbarButtonClass}
+          onClick={() => {
+            openDocs('github-collaboration');
+          }}
+        >
+          {t('github.guide')}
+        </button>
         <span className="flex-1" />
         <span className="text-ink-muted flex items-center gap-1.5 text-xs">
           <Avatar name={actor.identity.name} colorToken={avatarToken(actor.id)} />

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { SessionProvider } from '@/presentation/stores/SessionProvider';
 import { createTestSessionStore } from '@/test/fixtures/createTestSessionStore';
 
+import { useDocsStore } from '../../stores/docsStore';
 import { useGitHubStore } from '../../stores/githubStore';
 import { usePreferencesStore } from '../../stores/preferencesStore';
 import { AppHeader } from '../layout/AppHeader';
@@ -176,5 +177,18 @@ describe('GitHubPanel', () => {
     expect(panel().getByText(/push sur main/)).toBeInTheDocument();
     expect(panel().getByText('vérifie les messages des nouveaux commits')).toBeInTheDocument();
     expect(panel().getByText('construit le projet')).toBeInTheDocument();
+  });
+
+  it('opens the GitHub guide in the documentation', async () => {
+    const user = userEvent.setup();
+    renderGitHub();
+    useDocsStore.setState({ isOpen: false, history: [null] });
+    await user.click(screen.getByRole('button', { name: 'GitHub' }));
+    await user.click(panel().getByRole('button', { name: 'Guide' }));
+
+    expect(useDocsStore.getState()).toMatchObject({
+      isOpen: true,
+      history: ['github-collaboration'],
+    });
   });
 });
