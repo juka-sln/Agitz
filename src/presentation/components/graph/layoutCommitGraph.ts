@@ -6,6 +6,8 @@ import {
   type GraphCommit,
 } from '@/application/queries/getCommitGraph';
 
+import type { StationMotion } from './graphMotion';
+
 export const COLUMN_WIDTH = 170;
 export const ROW_HEIGHT = 140;
 export const STATION_SIZE = 22;
@@ -24,6 +26,8 @@ export interface StationData extends Record<string, unknown> {
   readonly branchTokens: Readonly<Record<string, string>>;
   /** Line token of each remote-tracking branch here: its own lane, else its local branch's. */
   readonly remoteBranchTokens: Readonly<Record<string, string>>;
+  /** How the station enters, when the last command moved or replayed it. */
+  readonly motion?: StationMotion;
 }
 
 export interface TransitEdgeData extends Record<string, unknown> {
@@ -33,6 +37,8 @@ export interface TransitEdgeData extends Record<string, unknown> {
   /** Shifts the vertical drop so parallel lines forking from one station stay distinct. */
   readonly offset: number;
   readonly faded: boolean;
+  /** Set on lines leading to a replayed commit, which only show once it has landed. */
+  readonly appearsAfterMs?: number;
 }
 
 export type StationNode = Node<StationData, 'station'>;

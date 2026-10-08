@@ -13,14 +13,21 @@ import type { CommitGraph } from '@/application/queries/getCommitGraph';
 import { shortHash } from '@/domain/value-objects/Hash';
 
 import { useFirstSteps } from '../../hooks/useFirstSteps';
+import { useSession } from '../../hooks/useSession';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCommitGraph } from '../../hooks/useWorkspaceViews';
 import { usePreferencesStore } from '../../stores/preferencesStore';
 
 import { GraphEmptyState } from './GraphEmptyState';
-import { layoutCommitGraph, type StationNode as StationNodeType } from './layoutCommitGraph';
+import { REPLAY_DURATION_MS, type GraphMotion } from './graphMotion';
+import {
+  layoutCommitGraph,
+  type StationNode as StationNodeType,
+  type TransitEdge as TransitEdgeType,
+} from './layoutCommitGraph';
 import { StationNode } from './StationNode';
 import { TransitEdge } from './TransitEdge';
+import { useGraphMotion } from './useGraphMotion';
 
 const nodeTypes = { station: StationNode };
 
@@ -81,14 +88,40 @@ function GraphSummary({ graph }: { graph: CommitGraph }) {
   );
 }
 
+/** Hands each station how it should enter, and holds back the lines of replayed commits. */
+function applyMotion(
+  { nodes, edges }: { nodes: StationNodeType[]; edges: TransitEdgeType[] },
+  motion: GraphMotion,
+) {
+  if (motion.size === 0) {
+    return { nodes, edges };
+  }
+  return {
+    nodes: nodes.map((node) => {
+      const move = motion.get(node.id);
+      return move === undefined ? node : { ...node, data: { ...node.data, motion: move } };
+    }),
+    edges: edges.map((edge) => {
+      const move = motion.get(edge.target);
+      const landsAfterMs = move?.replayedFrom ? move.delayMs + REPLAY_DURATION_MS : undefined;
+      return landsAfterMs === undefined || edge.data === undefined
+        ? edge
+        : { ...edge, data: { ...edge.data, appearsAfterMs: landsAfterMs } };
+    }),
+  };
+}
+
 export function CommitGraphView() {
   const { t } = useTranslation();
   const theme = usePreferencesStore((state) => state.theme);
   const graph = useCommitGraph();
   const firstSteps = useFirstSteps();
   const layout = useMemo(() => (graph ? layoutCommitGraph(graph) : null), [graph]);
+  const userId = useSession((state) => state.activeUser.id);
+  const motion = useGraphMotion(layout?.nodes ?? null, userId);
+  const animated = useMemo(() => layout && applyMotion(layout, motion), [layout, motion]);
 
-  if (!graph || !layout) {
+  if (!graph || !animated) {
     return (
       <GraphEmptyState
         title={t('graph.noRepository.title')}
@@ -118,8 +151,8 @@ export function CommitGraphView() {
       <GraphSummary graph={graph} />
       <ReactFlowProvider>
         <ReactFlow<StationNodeType>
-          nodes={layout.nodes}
-          edges={layout.edges}
+          nodes={animated.nodes}
+          edges={animated.edges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           colorMode={theme}
