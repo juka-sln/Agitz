@@ -121,6 +121,35 @@ describe('GitHubPanel', () => {
     );
   });
 
+  it('filters the pull requests by state and opens one from the list', async () => {
+    const user = userEvent.setup();
+    const store = createTestSessionStore(PUBLISH);
+    store.getState().switchUser('bob');
+    BOB_FEATURE.forEach((command) => {
+      store.getState().run(command);
+    });
+    renderGitHub(store);
+    await openProject(user);
+
+    await user.click(panel().getByRole('button', { name: 'Pull requests' }));
+    expect(panel().getByText(/Aucune pull request ici/)).toBeInTheDocument();
+    await user.click(panel().getByRole('button', { name: 'Nouvelle pull request' }));
+    await user.click(panel().getByRole('button', { name: 'Créer la pull request' }));
+    await user.click(panel().getByRole('button', { name: 'Fermer sans fusionner' }));
+    await user.click(panel().getByRole('button', { name: 'Pull requests' }));
+
+    expect(panel().getByRole('button', { name: 'Ouvertes : 0' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await user.click(panel().getByRole('button', { name: 'Fermées : 1' }));
+    await user.click(panel().getByRole('button', { name: /feat: add greeting/ }));
+
+    expect(
+      panel().getByRole('heading', { level: 3, name: /feat: add greeting #1/ }),
+    ).toBeInTheDocument();
+  });
+
   it('explains why a merge is blocked', async () => {
     const user = userEvent.setup();
     const store = createTestSessionStore(PUBLISH);
