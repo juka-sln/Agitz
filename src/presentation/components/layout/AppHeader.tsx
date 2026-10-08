@@ -176,12 +176,12 @@ export function AppHeader() {
   const missionsDone = useProgressStore((state) => selectCompletedMissions(state).length);
 
   return (
-    <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-4">
+    <header className="border-rule bg-surface flex h-12 items-center justify-between border-b px-3 sm:px-4">
       <div className="flex items-center gap-2.5">
         <LogoMark />
-        <h1 className="text-ink text-lg font-bold tracking-tight">Agitz</h1>
+        <h1 className="text-ink text-lg font-bold tracking-tight max-sm:sr-only">Agitz</h1>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         <button
           type="button"
           className={`${buttonClass} gap-1.5`}
@@ -240,9 +240,10 @@ export function AppHeader() {
           <BookIcon />
           <span className="sr-only sm:not-sr-only">{t('header.docs')}</span>
         </button>
+        {/* Touch screens have no keyboard to use the shortcuts with. */}
         <button
           type="button"
-          className={buttonClass}
+          className={`${buttonClass} max-sm:hidden`}
           onClick={openShortcuts}
           aria-keyshortcuts="?"
           title={t('header.shortcuts')}
