@@ -64,7 +64,7 @@ describe('Terminal', () => {
 
     await user.clear(input);
     await user.type(input, 'git c{Tab}');
-    expect(screen.getByText(/Suggestions/)).toHaveTextContent('checkout cherry-pick commit');
+    expect(screen.getByText(/Suggestions/)).toHaveTextContent('checkout cherry-pick clone commit');
   });
 
   it('marks errors', async () => {

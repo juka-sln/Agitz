@@ -2,6 +2,7 @@ import { buildRepository, fakeHash } from '@/test/fixtures/repositoryFixtures';
 
 import {
   collectReachableCommits,
+  countDivergence,
   findMergeBase,
   isAncestor,
   listCommitsInLogOrder,
@@ -68,5 +69,12 @@ describe('history', () => {
   it('has no merge base for unrelated histories', () => {
     const unrelated = buildRepository([{ hash: A }, { hash: B }], { main: A, other: B });
     expect(findMergeBase(unrelated, A, B)).toBeNull();
+  });
+
+  it('counts the commits each side has that the other lacks', () => {
+    expect(countDivergence(repository, C, D)).toEqual({ ahead: 1, behind: 1 });
+    expect(countDivergence(repository, M, D)).toEqual({ ahead: 2, behind: 0 });
+    expect(countDivergence(repository, A, C)).toEqual({ ahead: 0, behind: 2 });
+    expect(countDivergence(repository, C, C)).toEqual({ ahead: 0, behind: 0 });
   });
 });

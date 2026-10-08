@@ -67,7 +67,12 @@ function GraphSummary({ graph }: { graph: CommitGraph }) {
       <ol>
         {[...graph.commits].reverse().map((commit) => (
           <li key={commit.hash}>
-            {[shortHash(commit.hash), commit.subject, ...commit.branches].join(', ')}
+            {[
+              shortHash(commit.hash),
+              commit.subject,
+              ...commit.branches,
+              ...commit.remoteBranches,
+            ].join(', ')}
           </li>
         ))}
       </ol>

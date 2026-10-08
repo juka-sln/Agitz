@@ -49,6 +49,11 @@ function collectDecorations(repository: Repository): Map<Hash, string[]> {
         add(hash, name);
       }
     });
+  Object.entries(repository.remoteBranches)
+    .sort(byName)
+    .forEach(([name, hash]) => {
+      add(hash, name);
+    });
   return decorations;
 }
 
@@ -98,7 +103,11 @@ export class LogCommand implements GitCommand<LogInput> {
     const head = getHeadCommitHash(repository);
 
     if (input.all === true) {
-      starts.push(...Object.values(repository.branches));
+      starts.push(
+        ...Object.values(repository.branches),
+        ...Object.values(repository.remoteBranches),
+        ...Object.values(repository.tags).map((tag) => tag.target),
+      );
       if (head !== null) {
         starts.push(head);
       }

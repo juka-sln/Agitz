@@ -1,16 +1,64 @@
+import { upstreamName } from '../entities/Remote';
 import {
+  currentBranch,
   findBranch,
+  findRemoteBranch,
   findTag,
+  findUpstream,
   getCommit,
   getHeadCommitHash,
   type Repository,
 } from '../entities/Repository';
+import { NoUpstreamForBranchError } from '../errors/RemoteErrors';
 import { AmbiguousRevisionError, UnknownRevisionError } from '../errors/RepositoryErrors';
 import type { Hash } from '../value-objects/Hash';
 
 const REVISION_PATTERN = /^([^~^]+)((?:[~^]\d*)*)$/;
 const OPERATOR_PATTERN = /([~^])(\d*)/g;
 const HASH_PREFIX_PATTERN = /^[0-9a-f]{4,40}$/;
+const UPSTREAM_PATTERN = /^(.*)@\{(?:u|upstream)\}$/;
+
+/** Fully qualified names (`refs/heads/main`, `refs/remotes/origin/main`) and their short forms. */
+function resolveRefName(repository: Repository, name: string): Hash | undefined {
+  const qualified = name.startsWith('refs/') ? name.slice('refs/'.length) : name;
+  const [namespace = '', ...rest] = qualified.split('/');
+  const shortName = rest.join('/');
+  if (name !== qualified || ['heads', 'tags', 'remotes'].includes(namespace)) {
+    switch (namespace) {
+      case 'heads':
+        return findBranch(repository, shortName);
+      case 'tags':
+        return findTag(repository, shortName)?.target;
+      case 'remotes':
+        return findRemoteBranch(repository, shortName);
+      default:
+        return undefined;
+    }
+  }
+  // Like `git rev-parse`: tags, then branches, then remote-tracking branches.
+  return (
+    findTag(repository, name)?.target ??
+    findBranch(repository, name) ??
+    findRemoteBranch(repository, name)
+  );
+}
+
+/** `@{u}` or `feature@{upstream}`: the remote-tracking branch a local branch follows. */
+function resolveUpstream(repository: Repository, branchName: string, revision: string): Hash {
+  const branch = branchName === '' ? currentBranch(repository) : branchName;
+  if (branch === null) {
+    throw new UnknownRevisionError(revision);
+  }
+  const upstream = findUpstream(repository, branch);
+  if (upstream === undefined) {
+    throw new NoUpstreamForBranchError(branch);
+  }
+  const hash = findRemoteBranch(repository, upstreamName(upstream));
+  if (hash === undefined) {
+    throw new UnknownRevisionError(revision);
+  }
+  return hash;
+}
 
 function resolveBase(repository: Repository, base: string, revision: string): Hash {
   if (base === 'HEAD' || base === '@') {
@@ -21,15 +69,14 @@ function resolveBase(repository: Repository, base: string, revision: string): Ha
     return head;
   }
 
-  // Like `git rev-parse`, tags take precedence over branches with the same name.
-  const tag = findTag(repository, base);
-  if (tag !== undefined) {
-    return tag.target;
+  const upstream = UPSTREAM_PATTERN.exec(base);
+  if (upstream) {
+    return resolveUpstream(repository, upstream[1] ?? '', revision);
   }
 
-  const branch = findBranch(repository, base);
-  if (branch !== undefined) {
-    return branch;
+  const ref = resolveRefName(repository, base);
+  if (ref !== undefined) {
+    return ref;
   }
 
   if (HASH_PREFIX_PATTERN.test(base)) {

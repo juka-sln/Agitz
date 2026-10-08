@@ -3,6 +3,7 @@ import {
   advanceHead,
   currentBranch,
   findBranch,
+  findRemoteBranch,
   findTag,
   getCommit,
   getHeadCommitHash,
@@ -61,6 +62,8 @@ export function defaultMergeMessage(repository: Repository, target: string): str
     kind = 'tag';
   } else if (findBranch(repository, target) !== undefined) {
     kind = 'branch';
+  } else if (findRemoteBranch(repository, target) !== undefined) {
+    kind = 'remote-tracking branch';
   }
   const branch = currentBranch(repository);
   const destination = branch === null || DEFAULT_BRANCHES.has(branch) ? '' : ` into ${branch}`;

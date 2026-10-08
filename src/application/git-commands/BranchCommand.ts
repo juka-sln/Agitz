@@ -1,12 +1,16 @@
 import { attachedHead } from '@/domain/entities/Head';
+import { upstreamName } from '@/domain/entities/Remote';
 import {
   branchNames,
   currentBranch,
   deleteBranch,
   findBranch,
+  findUpstream,
   getCommit,
   getHeadCommitHash,
   setBranch,
+  setUpstream,
+  unsetUpstream,
   type Repository,
 } from '@/domain/entities/Repository';
 import { requireRepository, type Workspace } from '@/domain/entities/Workspace';
@@ -20,17 +24,35 @@ import {
   NoBranchNamedError,
 } from '@/domain/errors/BranchErrors';
 import { GitError } from '@/domain/errors/GitError';
+import {
+  DetachedHeadUpstreamError,
+  LocalUpstreamNotSupportedError,
+  NoUpstreamConfiguredError,
+  UpstreamBranchNotFoundError,
+} from '@/domain/errors/RemoteErrors';
 import { InvalidObjectNameError } from '@/domain/errors/RepositoryErrors';
 import { isAncestor } from '@/domain/services/history';
 import { tryResolveRevision } from '@/domain/services/revision';
 import { parseBranchName, type BranchName } from '@/domain/value-objects/BranchName';
+import { commitSubject } from '@/domain/value-objects/CommitMessage';
 import { shortHash, type Hash } from '@/domain/value-objects/Hash';
 
 import { explain, succeed, type CommandOutcome, type GitCommand } from './GitCommand';
-import { describeCommit } from './support/describeCommit';
+import {
+  formatTrackingSummary,
+  formatUpstreamSetup,
+  upstreamForStartPoint,
+} from './support/remotes';
+
+export type BranchListScope = 'local' | 'remote' | 'all';
 
 export type BranchInput =
-  | { readonly action: 'list'; readonly verbose?: boolean }
+  | {
+      readonly action: 'list';
+      /** `-v` shows the last commit, `-vv` also names the upstream branch. */
+      readonly verbosity?: number;
+      readonly scope?: BranchListScope;
+    }
   | {
       readonly action: 'create';
       readonly name: string;
@@ -43,14 +65,20 @@ export type BranchInput =
       readonly oldName?: string | undefined;
       readonly newName: string;
       readonly force?: boolean;
-    };
+    }
+  | {
+      readonly action: 'setUpstream';
+      readonly upstream: string;
+      readonly branch?: string | undefined;
+    }
+  | { readonly action: 'unsetUpstream'; readonly branch?: string | undefined };
 
 export class BranchCommand implements GitCommand<BranchInput> {
   execute(workspace: Workspace, input: BranchInput): CommandOutcome {
     const repository = requireRepository(workspace);
     switch (input.action) {
       case 'list':
-        return this.list(workspace, repository, input.verbose === true);
+        return this.list(workspace, repository, input.verbosity ?? 0, input.scope ?? 'local');
       case 'create':
         return this.create(
           workspace,
@@ -69,37 +97,73 @@ export class BranchCommand implements GitCommand<BranchInput> {
           input.newName,
           input.force === true,
         );
+      case 'setUpstream':
+        return this.setUpstream(workspace, repository, input.upstream, input.branch);
+      case 'unsetUpstream':
+        return this.unsetUpstream(workspace, repository, input.branch);
     }
   }
 
-  private list(workspace: Workspace, repository: Repository, verbose: boolean): CommandOutcome {
+  private list(
+    workspace: Workspace,
+    repository: Repository,
+    verbosity: number,
+    scope: BranchListScope,
+  ): CommandOutcome {
     const { head } = repository;
-    const rows: { marker: string; label: string; hash: Hash }[] = branchNames(repository).flatMap(
-      (name) => {
+    const rows: { marker: string; label: string; hash: Hash; branch: string | null }[] = [];
+    if (scope !== 'remote') {
+      for (const name of branchNames(repository)) {
         const hash = findBranch(repository, name);
-        return hash === undefined
-          ? []
-          : [{ marker: currentBranch(repository) === name ? '*' : ' ', label: name, hash }];
-      },
-    );
-    if (head.type === 'detached') {
-      rows.unshift({
-        marker: '*',
-        label: `(HEAD detached at ${shortHash(head.commit)})`,
-        hash: head.commit,
-      });
+        if (hash !== undefined) {
+          rows.push({
+            marker: currentBranch(repository) === name ? '*' : ' ',
+            label: name,
+            hash,
+            branch: name,
+          });
+        }
+      }
+      if (head.type === 'detached') {
+        rows.unshift({
+          marker: '*',
+          label: `(HEAD detached at ${shortHash(head.commit)})`,
+          hash: head.commit,
+          branch: null,
+        });
+      }
+    }
+    if (scope !== 'local') {
+      for (const [name, hash] of Object.entries(repository.remoteBranches).sort(([left], [right]) =>
+        left.localeCompare(right),
+      )) {
+        rows.push({
+          marker: ' ',
+          label: scope === 'all' ? `remotes/${name}` : name,
+          hash,
+          branch: null,
+        });
+      }
     }
 
     const width = Math.max(0, ...rows.map((row) => row.label.length));
     const output = rows
-      .map(({ marker, label, hash }) =>
-        verbose
-          ? `${marker} ${label.padEnd(width)} ${describeCommit(getCommit(repository, hash))}`
-          : `${marker} ${label}`,
-      )
+      .map(({ marker, label, hash, branch }) => {
+        if (verbosity === 0) {
+          return `${marker} ${label}`;
+        }
+        const commit = getCommit(repository, hash);
+        const tracking =
+          branch === null ? null : formatTrackingSummary(repository, branch, verbosity > 1);
+        return `${marker} ${label.padEnd(width)} ${shortHash(hash)} ${tracking === null ? '' : `${tracking} `}${commitSubject(commit.message)}`;
+      })
       .join('\n');
 
-    return succeed(workspace, output, explain('branch.listed', { count: rows.length }));
+    return succeed(
+      workspace,
+      output,
+      explain(scope === 'local' ? 'branch.listed' : 'branch.listedRemote', { count: rows.length }),
+    );
   }
 
   private create(
@@ -124,8 +188,22 @@ export class BranchCommand implements GitCommand<BranchInput> {
       throw new InvalidObjectNameError(startPoint ?? currentBranch(repository) ?? 'HEAD');
     }
 
+    const upstream =
+      startPoint === undefined ? null : upstreamForStartPoint(repository, startPoint);
+    const next = setBranch(repository, name, target);
+    if (upstream !== null) {
+      return succeed(
+        { ...workspace, repository: setUpstream(next, name, upstream) },
+        formatUpstreamSetup(name, upstream),
+        explain('branch.createdTracking', {
+          name,
+          commit: shortHash(target),
+          upstream: upstreamName(upstream),
+        }),
+      );
+    }
     return succeed(
-      { ...workspace, repository: setBranch(repository, name, target) },
+      { ...workspace, repository: next },
       '',
       explain(existing === undefined ? 'branch.created' : 'branch.reset', {
         name,
@@ -159,7 +237,7 @@ export class BranchCommand implements GitCommand<BranchInput> {
         if (!force && (head === null || !isAncestor(next, hash, head))) {
           throw new BranchNotFullyMergedError(name);
         }
-        next = deleteBranch(next, name as BranchName);
+        next = unsetUpstream(deleteBranch(next, name as BranchName), name);
         deleted.push(name);
         lines.push(`Deleted branch ${name} (was ${shortHash(hash)}).`);
       } catch (error) {
@@ -205,9 +283,13 @@ export class BranchCommand implements GitCommand<BranchInput> {
       throw new BranchAlreadyExistsError(newName);
     }
 
-    let next = deleteBranch(repository, source as BranchName);
+    const upstream = findUpstream(repository, source);
+    let next = unsetUpstream(deleteBranch(repository, source as BranchName), source);
     if (hash !== undefined) {
       next = setBranch(next, newName, hash);
+    }
+    if (upstream !== undefined) {
+      next = setUpstream(next, newName, upstream);
     }
     if (source === current) {
       next = { ...next, head: attachedHead(newName) };
@@ -217,6 +299,52 @@ export class BranchCommand implements GitCommand<BranchInput> {
       { ...workspace, repository: next },
       '',
       explain('branch.renamed', { from: source, to: newName }),
+    );
+  }
+
+  private setUpstream(
+    workspace: Workspace,
+    repository: Repository,
+    rawUpstream: string,
+    rawBranch: string | undefined,
+  ): CommandOutcome {
+    const branch = rawBranch ?? currentBranch(repository);
+    if (branch === null) {
+      throw new DetachedHeadUpstreamError(rawUpstream);
+    }
+    if (findBranch(repository, branch) === undefined) {
+      throw new BranchNotFoundError(branch);
+    }
+    const upstream = upstreamForStartPoint(repository, rawUpstream);
+    if (upstream === null) {
+      if (findBranch(repository, rawUpstream) !== undefined) {
+        throw new LocalUpstreamNotSupportedError(rawUpstream);
+      }
+      throw new UpstreamBranchNotFoundError(rawUpstream);
+    }
+    return succeed(
+      { ...workspace, repository: setUpstream(repository, branch as BranchName, upstream) },
+      formatUpstreamSetup(branch, upstream),
+      explain('branch.upstreamSet', { name: branch, upstream: upstreamName(upstream) }),
+    );
+  }
+
+  private unsetUpstream(
+    workspace: Workspace,
+    repository: Repository,
+    rawBranch: string | undefined,
+  ): CommandOutcome {
+    const branch = rawBranch ?? currentBranch(repository);
+    if (branch === null) {
+      throw new DetachedHeadRenameError();
+    }
+    if (findUpstream(repository, branch) === undefined) {
+      throw new NoUpstreamConfiguredError(branch);
+    }
+    return succeed(
+      { ...workspace, repository: unsetUpstream(repository, branch) },
+      '',
+      explain('branch.upstreamUnset', { name: branch }),
     );
   }
 }

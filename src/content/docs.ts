@@ -2,11 +2,16 @@ import { addDoc } from './commands/add';
 import { branchDoc } from './commands/branch';
 import { checkoutDoc } from './commands/checkout';
 import { cherryPickDoc } from './commands/cherryPick';
+import { cloneDoc } from './commands/clone';
 import { commitDoc } from './commands/commit';
+import { fetchDoc } from './commands/fetch';
 import { initDoc } from './commands/init';
 import { logDoc } from './commands/log';
 import { mergeDoc } from './commands/merge';
+import { pullDoc } from './commands/pull';
+import { pushDoc } from './commands/push';
 import { rebaseDoc } from './commands/rebase';
+import { remoteDoc } from './commands/remote';
 import { resetDoc } from './commands/reset';
 import { revertDoc } from './commands/revert';
 import { shellDoc } from './commands/shell';
@@ -25,6 +30,7 @@ export const COMMAND_CATEGORIES: readonly CommandCategory[] = [
   'basics',
   'branches',
   'undo',
+  'remote',
   'shell',
 ];
 
@@ -43,6 +49,11 @@ export const COMMAND_DOCS: readonly CommandDoc[] = [
   resetDoc,
   revertDoc,
   stashDoc,
+  cloneDoc,
+  remoteDoc,
+  fetchDoc,
+  pullDoc,
+  pushDoc,
   shellDoc,
 ];
 

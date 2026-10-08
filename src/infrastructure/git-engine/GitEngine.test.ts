@@ -1,3 +1,4 @@
+import { createHostedRepository, EMPTY_NETWORK, type Network } from '@/domain/entities/Network';
 import { createWorkspace, writeFile, type Workspace } from '@/domain/entities/Workspace';
 import { FakeClock } from '@/test/doubles/FakeClock';
 
@@ -122,10 +123,10 @@ describe('GitEngine', () => {
     expect(session.run('git comit').output).toBe(
       "git: 'comit' is not a git command. See 'git --help'.\n\nThe most similar command is\n\tcommit",
     );
-    expect(session.run('git push origin main')).toMatchObject({
-      output: "agitz: 'git push' is not available yet",
+    expect(session.run('git restore README.md')).toMatchObject({
+      output: "agitz: 'git restore' is not available yet",
       exitCode: 1,
-      explanation: { key: 'shell.notImplemented', params: { command: 'push' } },
+      explanation: { key: 'shell.notImplemented', params: { command: 'restore' } },
     });
   });
 
@@ -151,6 +152,48 @@ describe('GitEngine', () => {
       'revert',
       'stash',
       'tag',
+      'clone',
+      'remote',
+      'fetch',
+      'pull',
+      'push',
     ]);
+  });
+
+  it('exchanges commits with hosted repositories from command lines', () => {
+    const engine = createGitEngine({ hasher: new Sha1ObjectHasher(), clock: new FakeClock() });
+    let network: Network = createHostedRepository(
+      EMPTY_NETWORK,
+      'https://github.com/alice/project.git',
+    );
+    let alice: Workspace = createWorkspace('/home/alice/project', {
+      name: 'Alice',
+      email: 'alice@example.com',
+    });
+    let bob: Workspace = createWorkspace('/home/bob/project', {
+      name: 'Bob',
+      email: 'bob@example.com',
+    });
+    const run = (workspace: Workspace, commandLine: string) => {
+      const result = engine.execute(commandLine, workspace, network);
+      network = result.network ?? network;
+      return result;
+    };
+
+    alice = run(alice, 'git init').workspace;
+    alice = writeFile(alice, 'README.md', '# Agitz\n');
+    alice = run(alice, 'git add .').workspace;
+    alice = run(alice, 'git commit -m "docs: add readme"').workspace;
+    alice = run(alice, 'git remote add origin https://github.com/alice/project.git').workspace;
+    const pushed = run(alice, 'git push -u origin main');
+    expect(pushed.output).toContain(' * [new branch]      main -> main');
+
+    bob = run(bob, 'git clone https://github.com/alice/project.git').workspace;
+    expect(bob.files).toEqual({ 'README.md': '# Agitz\n' });
+    expect(run(bob, 'git pull').output).toBe('Already up to date.');
+    expect(run(bob, 'git push --force-with-lease').output).toBe('Everything up-to-date');
+    expect(run(bob, 'git remote -v').output).toContain(
+      'origin\thttps://github.com/alice/project.git (fetch)',
+    );
   });
 });

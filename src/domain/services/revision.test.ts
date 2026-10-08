@@ -1,6 +1,8 @@
 import { buildRepository, fakeHash } from '@/test/fixtures/repositoryFixtures';
 
+import { NoUpstreamForBranchError } from '../errors/RemoteErrors';
 import { AmbiguousRevisionError, UnknownRevisionError } from '../errors/RepositoryErrors';
+import type { BranchName } from '../value-objects/BranchName';
 import { toHash } from '../value-objects/Hash';
 
 import { resolveRevision, tryResolveRevision } from './revision';
@@ -68,5 +70,37 @@ describe('resolveRevision', () => {
 
     expect(resolveRevision(tagged, 'v1~1')).toBe(A);
     expect(resolveRevision(tagged, 'feature')).toBe(C);
+  });
+
+  describe('with remote-tracking branches', () => {
+    const tracked = {
+      ...repository,
+      remoteBranches: { 'origin/main': C, 'origin/feature': D },
+      upstreams: { main: { remote: 'origin', branch: 'main' as BranchName } },
+    };
+
+    it.each([
+      ['origin/main', C],
+      ['origin/main~1', B],
+      ['remotes/origin/feature', D],
+      ['refs/remotes/origin/main', C],
+      ['refs/heads/main', M],
+      ['@{u}', C],
+      ['@{upstream}~2', A],
+      ['main@{u}', C],
+    ])('resolves %s', (revision, expected) => {
+      expect(resolveRevision(tracked, revision)).toBe(expected);
+    });
+
+    it('prefers local branches over remote-tracking ones', () => {
+      const shadowed = { ...tracked, branches: { ...tracked.branches, 'origin/main': A } };
+      expect(resolveRevision(shadowed, 'origin/main')).toBe(A);
+      expect(resolveRevision(shadowed, 'refs/remotes/origin/main')).toBe(C);
+    });
+
+    it('requires an upstream for @{u}', () => {
+      expect(() => resolveRevision(tracked, 'feature@{u}')).toThrow(NoUpstreamForBranchError);
+      expect(tryResolveRevision(tracked, 'refs/heads/origin/main')).toBeNull();
+    });
   });
 });

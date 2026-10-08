@@ -2,7 +2,7 @@ import { BranchCommand } from '@/application/git-commands/BranchCommand';
 
 import type { CliCommand } from '../CliCommand';
 import { CommandLineError } from '../CommandLineErrors';
-import { hasOption } from '../parseArguments';
+import { hasOption, lastOptionValue, optionValues } from '../parseArguments';
 
 export function createBranchCliCommand(): CliCommand {
   const command = new BranchCommand();
@@ -10,7 +10,9 @@ export function createBranchCliCommand(): CliCommand {
     name: 'branch',
     summary: 'List, create, or delete branches',
     usage: [
-      'git branch [-v] [-l]',
+      'git branch [-v | -vv] [-r | -a] [-l]',
+      '   or: git branch (-u | --set-upstream-to=) <upstream> [<branch-name>]',
+      '   or: git branch --unset-upstream [<branch-name>]',
       '   or: git branch [-f] <branch-name> [<start-point>]',
       '   or: git branch (-d | -D) <branch-name>...',
       '   or: git branch (-m | -M) [<old-branch>] <new-branch>',
@@ -23,10 +25,25 @@ export function createBranchCliCommand(): CliCommand {
       { name: 'force', short: 'f', long: 'force' },
       { name: 'verbose', short: 'v', long: 'verbose' },
       { name: 'list', short: 'l', long: 'list' },
+      { name: 'remotes', short: 'r', long: 'remotes' },
+      { name: 'all', short: 'a', long: 'all' },
+      { name: 'setUpstreamTo', short: 'u', long: 'set-upstream-to', takesValue: true },
+      { name: 'unsetUpstream', long: 'unset-upstream' },
     ],
     execute(args, workspace) {
       const names = args.positionals;
       const force = hasOption(args, 'force');
+
+      const upstream = lastOptionValue(args, 'setUpstreamTo');
+      if (upstream !== undefined || hasOption(args, 'unsetUpstream')) {
+        const [branch, ...extra] = names;
+        if (extra.length > 0) {
+          throw new CommandLineError('fatal: too many arguments to set new upstream');
+        }
+        return upstream === undefined
+          ? command.execute(workspace, { action: 'unsetUpstream', branch })
+          : command.execute(workspace, { action: 'setUpstream', upstream, branch });
+      }
 
       if (hasOption(args, 'delete') || hasOption(args, 'forceDelete')) {
         if (names.length === 0) {
@@ -56,8 +73,17 @@ export function createBranchCliCommand(): CliCommand {
       }
 
       const [name, startPoint, ...extra] = names;
-      if (name === undefined || hasOption(args, 'list')) {
-        return command.execute(workspace, { action: 'list', verbose: hasOption(args, 'verbose') });
+      const scope = hasOption(args, 'all')
+        ? 'all'
+        : hasOption(args, 'remotes')
+          ? 'remote'
+          : 'local';
+      if (name === undefined || hasOption(args, 'list') || scope !== 'local') {
+        return command.execute(workspace, {
+          action: 'list',
+          verbosity: optionValues(args, 'verbose').length,
+          scope,
+        });
       }
       if (extra.length > 0) {
         throw new CommandLineError('fatal: too many arguments to create a branch');
