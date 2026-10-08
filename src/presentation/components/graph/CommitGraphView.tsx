@@ -12,6 +12,7 @@ import { useEffect, useMemo } from 'react';
 import type { CommitGraph } from '@/application/queries/getCommitGraph';
 import { shortHash } from '@/domain/value-objects/Hash';
 
+import { useFirstSteps } from '../../hooks/useFirstSteps';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCommitGraph } from '../../hooks/useWorkspaceViews';
 import { usePreferencesStore } from '../../stores/preferencesStore';
@@ -84,14 +85,17 @@ export function CommitGraphView() {
   const { t } = useTranslation();
   const theme = usePreferencesStore((state) => state.theme);
   const graph = useCommitGraph();
+  const firstSteps = useFirstSteps();
   const layout = useMemo(() => (graph ? layoutCommitGraph(graph) : null), [graph]);
 
   if (!graph || !layout) {
     return (
       <GraphEmptyState
         title={t('graph.noRepository.title')}
-        body={t('graph.noRepository.body')}
-        commands={['git init']}
+        body={t(
+          firstSteps.joinsByCloning ? 'graph.noRepository.cloneBody' : 'graph.noRepository.body',
+        )}
+        commands={firstSteps.joinsByCloning ? firstSteps.steps.slice(0, 1) : ['git init']}
       />
     );
   }

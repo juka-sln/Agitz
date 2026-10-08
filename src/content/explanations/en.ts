@@ -296,7 +296,7 @@ export const en: Record<keyof typeof fr, ExplanationText> = {
   'error.repositoryNotFound':
     'No repository exists at `{url}`. Check the URL: in Agitz, the shared repository is https://github.com/alice/project.git.',
   'error.cloneDestinationNotEmpty':
-    'This workstation already holds a project. To clone, switch to another user (or add one) whose workstation is empty.',
+    'This workstation already holds a project. To clone, switch to another teammate in the Team panel (or add one) whose workstation is empty.',
   'error.remoteRefNotFound':
     'The remote has no branch `{ref}`. `git branch -r` lists the ones you know.',
   'error.noPushDestination':
