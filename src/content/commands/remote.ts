@@ -5,7 +5,7 @@ export const remoteDoc: CommandDoc = {
   id: 'remote',
   title: 'git remote',
   category: 'remote',
-  related: ['clone', 'fetch', 'push'],
+  related: ['clone', 'fetch', 'push', 'github-collaboration'],
   text: {
     fr: {
       summary: 'Gère les surnoms des dépôts distants avec lesquels tu échanges des commits.',

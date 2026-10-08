@@ -27,7 +27,7 @@ function GuideBlockView({ block }: { block: GuideBlock }) {
       );
     case 'code':
       return (
-        <pre className="bg-terminal text-terminal-ink overflow-x-auto rounded-md px-3 py-2 font-mono text-[13px]">
+        <pre className="bg-terminal text-terminal-ink rounded-md px-3 py-2 font-mono text-[13px] break-all whitespace-pre-wrap">
           <code>{block.code}</code>
         </pre>
       );

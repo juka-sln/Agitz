@@ -3,6 +3,7 @@ export const GITHUB_FR = {
   'header.github': 'GitHub',
 
   'github.close': 'Fermer GitHub',
+  'github.guide': 'Guide',
   'github.signedInAs': 'connecté en tant que {login}',
   'github.allRepositories': 'Dépôts',
   'github.repositories': 'Dépôts sur GitHub',
@@ -246,6 +247,7 @@ export const GITHUB_EN: Record<GitHubMessageKey, string> = {
   'header.github': 'GitHub',
 
   'github.close': 'Close GitHub',
+  'github.guide': 'Guide',
   'github.signedInAs': 'signed in as {login}',
   'github.allRepositories': 'Repositories',
   'github.repositories': 'Repositories on GitHub',

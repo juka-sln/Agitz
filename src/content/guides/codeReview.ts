@@ -3,7 +3,7 @@ import type { GuideDoc } from '../model';
 export const codeReviewGuide: GuideDoc = {
   kind: 'guide',
   id: 'code-review',
-  related: ['commit-messages', 'branching-strategy', 'merge-vs-rebase'],
+  related: ['commit-messages', 'branching-strategy', 'merge-vs-rebase', 'github-collaboration'],
   text: {
     fr: {
       title: 'Étiquette de la revue de code',
