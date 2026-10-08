@@ -30,10 +30,14 @@ import {
 import type { Completion } from '@/infrastructure/shell/completion';
 import type { Shell } from '@/infrastructure/shell/Shell';
 
+import { describePrompt, type PromptParts } from '../hooks/usePrompt';
+
+import type { SavedWorkstation, SessionSnapshot } from './sessionSnapshot';
+
 export interface TerminalEntry {
   readonly id: number;
-  /** The workspace as it was when the command was typed, to render its prompt. */
-  readonly workspaceBefore: Workspace;
+  /** The prompt as it was when the command was typed. */
+  readonly prompt: PromptParts;
   readonly commandLine: string;
   readonly output: string;
   readonly exitCode: number;
@@ -115,12 +119,41 @@ function flatten({ user, ...workstation }: Workstation) {
   return { activeUser: user, ...workstation };
 }
 
-export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions: GitHubActions) {
+function restoreWorkstation(saved: SavedWorkstation): Workstation {
+  return { ...saved, lastResult: null };
+}
+
+/** The saved session, picked up where it was left, or `null` if it does not hold together. */
+function restoreSession(snapshot: SessionSnapshot) {
+  const active = snapshot.workstations.find(
+    (workstation) => workstation.user.id === snapshot.activeUserId,
+  );
+  if (active === undefined) {
+    return null;
+  }
+  return {
+    users: snapshot.users,
+    network: snapshot.network,
+    github: snapshot.github,
+    otherWorkstations: Object.fromEntries(
+      snapshot.workstations
+        .filter((workstation) => workstation !== active)
+        .map((workstation) => [workstation.user.id, restoreWorkstation(workstation)]),
+    ),
+    ...flatten(restoreWorkstation(active)),
+  };
+}
+
+export function createSessionStore(
+  shell: Shell,
+  team: TeamSetup,
+  gitHubActions: GitHubActions,
+  snapshot: SessionSnapshot | null = null,
+) {
   const [firstUser, ...otherUsers] = team.users;
   if (firstUser === undefined) {
     throw new Error('A session needs at least one user');
   }
-  let nextId = 1;
   const initialState = () => ({
     users: team.users,
     network: team.network,
@@ -130,9 +163,14 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
     ),
     ...flatten(createWorkstation(firstUser)),
   });
+  const restored = snapshot === null ? null : restoreSession(snapshot);
+  const savedEntryIds = (restored === null ? [] : (snapshot?.workstations ?? [])).flatMap(
+    (workstation) => workstation.entries.map((entry) => entry.id),
+  );
+  let nextId = Math.max(0, ...savedEntryIds) + 1;
 
   return createStore<SessionState>()((set, get) => ({
-    ...initialState(),
+    ...(restored ?? initialState()),
     gitHubActions,
 
     run(commandLine) {
@@ -152,7 +190,7 @@ export function createSessionStore(shell: Shell, team: TeamSetup, gitHubActions:
           : runWorkflows({ network: result.network, github }, network);
       const entry: TerminalEntry = {
         id: nextId,
-        workspaceBefore: workspace,
+        prompt: describePrompt(workspace),
         commandLine: trimmed,
         output: result.output,
         exitCode: result.exitCode,

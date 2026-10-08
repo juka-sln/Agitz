@@ -7,6 +7,7 @@ import { GitHubPanel } from './components/github/GitHubPanel';
 import { CommitGraphView } from './components/graph/CommitGraphView';
 import { AppHeader } from './components/layout/AppHeader';
 import { HostedRepositories } from './components/team/HostedRepositories';
+import { RestartSession } from './components/team/RestartSession';
 import { UserSwitcher } from './components/team/UserSwitcher';
 import { Terminal } from './components/terminal/Terminal';
 import { useDocsStore } from './stores/docsStore';
@@ -73,6 +74,7 @@ export function App({ store }: { store: SessionStore }) {
             <UserSwitcher />
             <FileExplorer />
             <HostedRepositories />
+            <RestartSession />
           </aside>
           <main className="relative grid min-h-0 grid-rows-[minmax(16rem,1fr)_minmax(14rem,40%)]">
             <section className="relative min-h-0">
