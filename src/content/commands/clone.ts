@@ -5,7 +5,7 @@ export const cloneDoc: CommandDoc = {
   id: 'clone',
   title: 'git clone',
   category: 'remote',
-  related: ['remote', 'pull', 'push'],
+  related: ['remote', 'pull', 'push', 'github-collaboration'],
   text: {
     fr: {
       summary: 'Copie un dépôt distant sur ton poste, avec tout son historique.',

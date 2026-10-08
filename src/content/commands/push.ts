@@ -5,7 +5,7 @@ export const pushDoc: CommandDoc = {
   id: 'push',
   title: 'git push',
   category: 'remote',
-  related: ['pull', 'fetch', 'remote'],
+  related: ['pull', 'fetch', 'remote', 'github-collaboration'],
   text: {
     fr: {
       summary: 'Publie tes commits sur le dépôt distant pour les partager.',

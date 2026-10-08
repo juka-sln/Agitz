@@ -62,6 +62,7 @@ describe('documentation catalog', () => {
         'gitignore',
         'semver',
         'code-review',
+        'github-collaboration',
       ]),
     );
   });
