@@ -126,7 +126,7 @@ export function DocsPanel() {
           <ToolbarIcon path="M4 4l8 8M12 4l-8 8" />
         </ToolbarButton>
       </div>
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-8">
+      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-8">
         {doc === undefined ? (
           <DocsIndex headingRef={headingRef} onOpen={open} />
         ) : doc.kind === 'command' ? (

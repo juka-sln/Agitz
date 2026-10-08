@@ -145,7 +145,7 @@ export function MissionsPanel() {
           <span className="sr-only">{t('missions.close')}</span>
         </button>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 pt-4 pb-8">
+      <div className="relative flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 pt-4 pb-8">
         <div className="flex flex-col gap-2">
           <h2 ref={headingRef} tabIndex={-1} className="text-ink text-base font-bold">
             {t('missions.title')}

@@ -120,7 +120,7 @@ export function GitHubPanel() {
           <span className="sr-only">{t('github.close')}</span>
         </button>
       </div>
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-8">
+      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-8">
         {project === undefined ? (
           <RepositoryList headingRef={headingRef} />
         ) : (

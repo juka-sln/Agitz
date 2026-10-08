@@ -106,7 +106,7 @@ export function ShortcutsDialog() {
           {t('shortcuts.close')}
         </button>
       </div>
-      <div className="max-h-[70vh] overflow-y-auto px-5 pt-2 pb-5">
+      <div className="relative max-h-[70vh] overflow-y-auto px-5 pt-2 pb-5">
         {GROUPS.map((group) => (
           <section key={group.title} aria-labelledby={group.title} className="mt-3">
             <h3 id={group.title} className="text-ink-muted mb-1 text-xs font-bold uppercase">

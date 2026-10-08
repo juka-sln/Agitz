@@ -99,7 +99,7 @@ export function Terminal() {
     >
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
+        className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3"
         role="log"
         aria-label={t('terminal.label')}
       >
