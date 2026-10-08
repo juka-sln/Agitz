@@ -74,6 +74,10 @@ const fr = {
   'team.error.invalid': 'Le prénom doit commencer par une lettre.',
   'team.error.taken': 'Ce coéquipier existe déjà.',
 
+  'hosted.empty': 'Dépôt vide : personne n’a encore poussé.',
+  'hosted.branches': 'Branches sur GitHub',
+  'hosted.default': 'branche par défaut',
+
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Commande',
   'terminal.welcome.title': 'Bienvenue dans Agitz.',
@@ -160,6 +164,10 @@ const en: Record<MessageKey, string> = {
   'team.error.tooLong': '{max} characters at most.',
   'team.error.invalid': 'The name must start with a letter.',
   'team.error.taken': 'This teammate already exists.',
+
+  'hosted.empty': 'Empty repository: nobody pushed yet.',
+  'hosted.branches': 'Branches on GitHub',
+  'hosted.default': 'default branch',
 
   'terminal.label': 'Terminal',
   'terminal.inputLabel': 'Command',
